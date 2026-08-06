@@ -16,8 +16,11 @@ export const useImageUpload = () => {
       const formData = new FormData();
       formData.append('file', file);
 
+      // Resolve base API URL dynamically (localhost:5000 locally, relative on Vercel prod)
+      const API_BASE = import.meta.env.PROD ? '' : 'http://localhost:5000';
+
       try {
-        const response = await fetch('http://localhost:5000/api/upload', {
+        const response = await fetch(`${API_BASE}/api/upload`, {
           method: 'POST',
           body: formData,
         });

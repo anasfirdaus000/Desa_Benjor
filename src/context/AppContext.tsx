@@ -158,6 +158,12 @@ const initialAdminProfile = {
   email: 'admin@benjor.desa.id'
 };
 
+// Dynamic helper to resolve localhost vs production base endpoint
+const getApiUrl = (path: string) => {
+  const API_BASE = import.meta.env.PROD ? '' : 'http://localhost:5000';
+  return `${API_BASE}${path}`;
+};
+
 const AppContext = createContext<AppState | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -173,22 +179,22 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     const fetchBackendData = async () => {
       try {
-        const infoRes = await fetch('http://localhost:5000/api/village-info');
+        const infoRes = await fetch(getApiUrl('/api/village-info'));
         if (infoRes.ok) setVillageInfo(await infoRes.json());
         
-        const sliderRes = await fetch('http://localhost:5000/api/slider');
+        const sliderRes = await fetch(getApiUrl('/api/slider'));
         if (sliderRes.ok) setSliderImages(await sliderRes.json());
 
-        const beritaRes = await fetch('http://localhost:5000/api/berita');
+        const beritaRes = await fetch(getApiUrl('/api/berita'));
         if (beritaRes.ok) setBerita(await beritaRes.json());
 
-        const umkmRes = await fetch('http://localhost:5000/api/umkm');
+        const umkmRes = await fetch(getApiUrl('/api/umkm'));
         if (umkmRes.ok) setUmkm(await umkmRes.json());
 
-        const sotkRes = await fetch('http://localhost:5000/api/sotk');
+        const sotkRes = await fetch(getApiUrl('/api/sotk'));
         if (sotkRes.ok) setSotk(await sotkRes.json());
 
-        const infoGRes = await fetch('http://localhost:5000/api/infografis');
+        const infoGRes = await fetch(getApiUrl('/api/infografis'));
         if (infoGRes.ok) setInfografis(await infoGRes.json());
       } catch (err) {
         console.warn('Backend API is offline or not set up. Falling back to local static mock data.', err);
@@ -224,12 +230,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         // Deletions
         const deleted = prev.filter(p => !nextList.some(n => n.id === p.id));
         for (const item of deleted) {
-          await syncWithBackend(`http://localhost:5000/api/berita/${item.id}`, 'DELETE', null);
+          await syncWithBackend(getApiUrl(`/api/berita/${item.id}`), 'DELETE', null);
         }
         // Additions
         const added = nextList.filter(n => !prev.some(p => p.id === n.id));
         for (const item of added) {
-          await syncWithBackend('http://localhost:5000/api/berita', 'POST', item);
+          await syncWithBackend(getApiUrl('/api/berita'), 'POST', item);
         }
         // Updates
         const updated = nextList.filter(n => {
@@ -237,7 +243,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           return old && JSON.stringify(old) !== JSON.stringify(n);
         });
         for (const item of updated) {
-          await syncWithBackend(`http://localhost:5000/api/berita/${item.id}`, 'PUT', item);
+          await syncWithBackend(getApiUrl(`/api/berita/${item.id}`), 'PUT', item);
         }
       })();
       return nextList;
@@ -251,12 +257,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         // Deletions
         const deleted = prev.filter(p => !nextList.some(n => n.id === p.id));
         for (const item of deleted) {
-          await syncWithBackend(`http://localhost:5000/api/umkm/${item.id}`, 'DELETE', null);
+          await syncWithBackend(getApiUrl(`/api/umkm/${item.id}`), 'DELETE', null);
         }
         // Additions
         const added = nextList.filter(n => !prev.some(p => p.id === n.id));
         for (const item of added) {
-          await syncWithBackend('http://localhost:5000/api/umkm', 'POST', item);
+          await syncWithBackend(getApiUrl('/api/umkm'), 'POST', item);
         }
         // Updates
         const updated = nextList.filter(n => {
@@ -264,7 +270,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           return old && JSON.stringify(old) !== JSON.stringify(n);
         });
         for (const item of updated) {
-          await syncWithBackend(`http://localhost:5000/api/umkm/${item.id}`, 'PUT', item);
+          await syncWithBackend(getApiUrl(`/api/umkm/${item.id}`), 'PUT', item);
         }
       })();
       return nextList;
@@ -278,12 +284,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         // Deletions
         const deleted = prev.filter(p => !nextList.some(n => n.id === p.id));
         for (const item of deleted) {
-          await syncWithBackend(`http://localhost:5000/api/sotk/${item.id}`, 'DELETE', null);
+          await syncWithBackend(getApiUrl(`/api/sotk/${item.id}`), 'DELETE', null);
         }
         // Additions
         const added = nextList.filter(n => !prev.some(p => p.id === n.id));
         for (const item of added) {
-          await syncWithBackend('http://localhost:5000/api/sotk', 'POST', item);
+          await syncWithBackend(getApiUrl('/api/sotk'), 'POST', item);
         }
         // Updates
         const updated = nextList.filter(n => {
@@ -291,7 +297,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           return old && JSON.stringify(old) !== JSON.stringify(n);
         });
         for (const item of updated) {
-          await syncWithBackend(`http://localhost:5000/api/sotk/${item.id}`, 'PUT', item);
+          await syncWithBackend(getApiUrl(`/api/sotk/${item.id}`), 'PUT', item);
         }
       })();
       return nextList;
@@ -305,12 +311,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         // Deletions
         const deleted = prev.filter(p => !nextList.some(n => n.id === p.id));
         for (const item of deleted) {
-          await syncWithBackend(`http://localhost:5000/api/slider/${item.id}`, 'DELETE', null);
+          await syncWithBackend(getApiUrl(`/api/slider/${item.id}`), 'DELETE', null);
         }
         // Additions
         const added = nextList.filter(n => !prev.some(p => p.id === n.id));
         for (const item of added) {
-          await syncWithBackend('http://localhost:5000/api/slider', 'POST', item);
+          await syncWithBackend(getApiUrl('/api/slider'), 'POST', item);
         }
       })();
       return nextList;
@@ -320,7 +326,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const handleSetVillageInfo = async (value: React.SetStateAction<VillageInfo>) => {
     setVillageInfo((prev) => {
       const nextVal = typeof value === 'function' ? (value as Function)(prev) : value;
-      syncWithBackend('http://localhost:5000/api/village-info', 'PUT', nextVal);
+      syncWithBackend(getApiUrl('/api/village-info'), 'PUT', nextVal);
       return nextVal;
     });
   };
@@ -328,7 +334,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const handleSetInfografis = async (value: React.SetStateAction<InfografisData>) => {
     setInfografis((prev) => {
       const nextVal = typeof value === 'function' ? (value as Function)(prev) : value;
-      syncWithBackend('http://localhost:5000/api/infografis', 'PUT', nextVal);
+      syncWithBackend(getApiUrl('/api/infografis'), 'PUT', nextVal);
       return nextVal;
     });
   };
