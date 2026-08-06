@@ -1,34 +1,25 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Camera, ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowLeft, MapPin, Camera, ChevronLeft, ChevronRight, X, Send, Trash2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAppContext } from '../../context/AppContext';
 
 const Galeri = () => {
+  const { wisata, fetchWisata } = useAppContext();
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [selectedWisataId, setSelectedWisataId] = useState<string | null>(null);
+  const [activePhotoIdx, setActivePhotoIdx] = useState(0);
+  const [commentName, setCommentName] = useState('');
+  const [commentText, setCommentText] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
-  const galeriWisata = [
-    { title: 'Wisata Siling Kanu - Air Terjun Utama', image: '/tamang_files/000eb415acb85e5560517e3dc2775072.jpg', desc: 'Pesona air terjun tersembunyi dengan alam yang asri.' },
-    { title: 'Wisata Bukit Bongku - Spot Foto Awan', image: '/tamang_files/f26e073b8124a077d194a810e3f2f3a1.jpg', desc: 'Keindahan pemandangan dari puncak bukit di pagi hari.' },
-    { title: 'Pesona Lembah Benjor - Lanskap Hijau', image: '/tamang_files/25305b13929576d65d9296b09ddb4b2c.jpg', desc: 'Hamparan lembah hijau yang menenangkan jiwa.' },
-    { title: 'Keasrian Hutan Desa - Flora Lokal', image: '/tamang_files/aaf8b88f7a33350eaa289c6ed07d0bc1.jpeg', desc: 'Hutan desa rimbun penunjang ekosistem mata air.' },
-    { title: 'Sungai Bersih - Aliran Benjor', image: '/tamang_files/1f8fa6396f6bd336ad793a4c88e37e18.jpeg', desc: 'Aliran sungai jernih dari pegunungan Malang.' },
-    { title: 'Rimbun Pinus - Area Camping', image: '/tamang_files/2536e945bc9b6bde053777264de2b75f.jpeg', desc: 'Camping ground asri di bawah pohon pinus.' },
-    { title: 'Pertanian Terpadu - Hasil Tani', image: '/tamang_files/a6085185b28d0ded30d077c9c80e27f7.jpg', desc: 'Perkebunan lokal penghasil produk organik.' },
-    { title: 'Pesona Air Terjun Mini', image: '/tamang_files/8d94257a2f2d6703d03fb0385cb775e0.jpeg', desc: 'Aliran jeram kecil di sepanjang tracking wisata.' },
-    { title: 'Sunset Lembah Benjor', image: '/tamang_files/29ce51f1e4ff8000b7b5e586ee73672a.jpeg', desc: 'Pemandangan matahari terbenam yang memukau.' },
-    { title: 'Pesona Hutan Bambu Desa', image: 'https://images.unsplash.com/photo-1590736969955-71cc94801759?auto=format&fit=crop&q=80', desc: 'Hutan bambu alami penghasil anyaman khas.' },
-    { title: 'Perkebunan Kopi Lereng Gunung', image: 'https://images.unsplash.com/photo-1559525839-b184a4d698c7?auto=format&fit=crop&q=80', desc: 'Tanaman kopi robusta unggulan petani Benjor.' },
-    { title: 'Pesona Jalur Ekspedisi Hutan', image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80', desc: 'Jalur tracking pendakian asri menembus hutan pinus.' },
-    { title: 'Pagi Hari Lembah Benjor', image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80', desc: 'Udara berkabut yang menyejukkan di lereng bukit.' },
-    { title: 'Pertanian Singkong Desa', image: 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&q=80', desc: 'Lahan singkong luas sebagai bahan baku kripik.' },
-    { title: 'Wisata Budaya - Bersih Desa', image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&q=80', desc: 'Upacara adat bersih desa yang diwariskan leluhur.' }
-  ];
+  const itemsPerPage = 10;
+  const isAdmin = !!localStorage.getItem('admin_token');
 
   // Pagination calculation
-  const totalPages = Math.ceil(galeriWisata.length / itemsPerPage);
+  const totalPages = Math.ceil(wisata.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedWisata = galeriWisata.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedWisata = wisata.slice(startIndex, startIndex + itemsPerPage);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
@@ -44,38 +35,99 @@ const Galeri = () => {
     }
   };
 
+  // Resolve API Base URL for calls
+  const getApiUrl = (path: string) => {
+    const API_BASE = import.meta.env.PROD ? '' : 'http://localhost:5000';
+    return `${API_BASE}${path}`;
+  };
+
+  // Add Comment API call
+  const handleAddComment = async (e: React.FormEvent, wisataId: string) => {
+    e.preventDefault();
+    if (!commentName.trim() || !commentText.trim()) return;
+
+    setIsSubmittingComment(true);
+    try {
+      const res = await fetch(getApiUrl(`/api/wisata/${wisataId}/comments`), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: commentName, text: commentText })
+      });
+      if (res.ok) {
+        setCommentText('');
+        await fetchWisata(); // refresh database state
+      } else {
+        alert('Gagal mengirimkan komentar.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Koneksi bermasalah.');
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  };
+
+  // Delete Comment API call (admin-only)
+  const handleDeleteComment = async (wisataId: string, commentId: string) => {
+    if (!window.confirm('Yakin ingin menghapus komentar ini?')) return;
+    const token = localStorage.getItem('admin_token');
+
+    try {
+      const res = await fetch(getApiUrl(`/api/wisata/${wisataId}/comments/${commentId}`), {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        await fetchWisata(); // refresh database state
+      } else {
+        alert('Gagal menghapus komentar.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Koneksi bermasalah.');
+    }
+  };
+
+  const activeWisata = wisata.find(w => w.id === selectedWisataId);
+  const activeWisataPhotos = activeWisata ? [activeWisata.image, ...(activeWisata.images || [])] : [];
+
   return (
-    <div className="min-h-screen bg-gray-50/50 py-12">
+    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-950 py-12 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Back navigation */}
-        <Link to="/" className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-[#2D5A27] transition-colors mb-8">
+        <Link to="/" className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-[#2D5A27] dark:hover:text-green-400 transition-colors mb-8">
           <ArrowLeft size={16} className="mr-2" />
           Kembali ke Beranda
         </Link>
 
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#2D5A27] border border-green-100">
+          <div className="w-16 h-16 bg-green-50 dark:bg-green-950/40 rounded-full flex items-center justify-center mx-auto mb-4 text-[#2D5A27] dark:text-green-400 border border-green-100 dark:border-green-900/30 shadow-sm">
             <Camera size={32} />
           </div>
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Galeri Wisata Desa Benjor</h1>
-          <p className="text-lg text-gray-500">Menjelajahi pesona keindahan alam, potensi wisata, dan dokumentasi keasrian Desa Benjor.</p>
+          <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-4 tracking-tight">Wisata Desa Benjor</h1>
+          <p className="text-lg text-gray-500 dark:text-gray-400">Menjelajahi pesona keindahan alam, potensi wisata, dan dokumentasi keasrian Desa Benjor.</p>
         </div>
 
         {/* Gallery Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {paginatedWisata.map((spot, idx) => (
+          {paginatedWisata.map((spot) => (
             <motion.div
-              key={idx}
+              key={spot.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: (idx % 3) * 0.1 }}
               whileHover={{ y: -6, scale: 1.02 }}
-              className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100/80 group cursor-pointer flex flex-col h-full"
+              onClick={() => {
+                setSelectedWisataId(spot.id);
+                setActivePhotoIdx(0);
+              }}
+              className="bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-sm border border-gray-100/80 dark:border-gray-800 group cursor-pointer flex flex-col h-full"
             >
-              <div className="h-64 overflow-hidden relative bg-gray-100">
+              <div className="h-64 overflow-hidden relative bg-gray-100 dark:bg-gray-800">
                 <img 
                   src={spot.image} 
                   alt={spot.title} 
@@ -84,14 +136,14 @@ const Galeri = () => {
               </div>
               <div className="p-6 flex-grow flex flex-col justify-between">
                 <div>
-                  <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-[#2D5A27] transition-colors">
+                  <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2 group-hover:text-[#2D5A27] dark:group-hover:text-green-400 transition-colors line-clamp-1">
                     {spot.title}
                   </h3>
-                  <p className="text-gray-500 text-sm leading-relaxed mb-4">
+                  <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-4 line-clamp-2">
                     {spot.desc}
                   </p>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-[#2D5A27] font-semibold mt-auto">
+                <div className="flex items-center gap-1 text-xs text-[#2D5A27] dark:text-green-400 font-semibold mt-auto">
                   <MapPin size={14} />
                   <span>Desa Benjor, Malang</span>
                 </div>
@@ -102,15 +154,15 @@ const Galeri = () => {
 
         {/* Premium Pagination Control */}
         {totalPages > 1 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 pt-8 gap-4">
-            <p className="text-sm text-gray-500 font-medium">
-              Menampilkan <span className="font-bold text-gray-800">{startIndex + 1}</span> - <span className="font-bold text-gray-800">{Math.min(startIndex + itemsPerPage, galeriWisata.length)}</span> dari <span className="font-bold text-gray-800">{galeriWisata.length}</span> objek wisata
+          <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200/60 dark:border-gray-800 pt-8 gap-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+              Menampilkan <span className="font-bold text-gray-800 dark:text-white">{startIndex + 1}</span> - <span className="font-bold text-gray-800 dark:text-white">{Math.min(startIndex + itemsPerPage, wisata.length)}</span> dari <span className="font-bold text-gray-800 dark:text-white">{wisata.length}</span> objek wisata
             </p>
             <div className="flex items-center gap-2">
               <button
                 onClick={handlePrevPage}
                 disabled={currentPage === 1}
-                className="p-2.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:border-[#2D5A27] hover:text-[#2D5A27] disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:text-gray-600 transition-colors shadow-sm cursor-pointer"
+                className="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:border-[#2D5A27] dark:hover:border-green-500 hover:text-[#2D5A27] dark:hover:text-green-400 disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:text-gray-600 transition-colors shadow-sm cursor-pointer"
               >
                 <ChevronLeft size={20} />
               </button>
@@ -125,7 +177,7 @@ const Galeri = () => {
                   className={`w-11 h-11 rounded-xl text-sm font-bold transition-all border shadow-sm ${
                     currentPage === i + 1
                       ? 'bg-[#2D5A27] border-[#2D5A27] text-white'
-                      : 'bg-white border-gray-200 text-gray-600 hover:border-[#2D5A27] hover:text-[#2D5A27]'
+                      : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#2D5A27] dark:hover:border-green-500 hover:text-[#2D5A27] dark:hover:text-green-400'
                   }`}
                 >
                   {i + 1}
@@ -135,7 +187,7 @@ const Galeri = () => {
               <button
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
-                className="p-2.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:border-[#2D5A27] hover:text-[#2D5A27] disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:text-gray-600 transition-colors shadow-sm cursor-pointer"
+                className="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:border-[#2D5A27] dark:hover:border-green-500 hover:text-[#2D5A27] dark:hover:text-green-400 disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:text-gray-600 transition-colors shadow-sm cursor-pointer"
               >
                 <ChevronRight size={20} />
               </button>
@@ -144,6 +196,137 @@ const Galeri = () => {
         )}
 
       </div>
+
+      {/* Wisata Detail Popup Modal with comments CRUD */}
+      <AnimatePresence>
+        {selectedWisataId && activeWisata && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="w-full max-w-4xl max-h-[90vh] bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-y-auto p-6 md:p-8 flex flex-col md:flex-row gap-8 relative border dark:border-gray-800"
+            >
+              {/* Close Button */}
+              <button 
+                onClick={() => setSelectedWisataId(null)}
+                className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-250 dark:hover:bg-gray-700 transition-colors z-20"
+              >
+                <X size={20} />
+              </button>
+
+              {/* Left Side: Photo slideshow gallery */}
+              <div className="w-full md:w-1/2 flex flex-col gap-4">
+                <div className="h-64 sm:h-80 w-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 relative shadow">
+                  <img 
+                    src={activeWisataPhotos[activePhotoIdx]} 
+                    alt={activeWisata.title} 
+                    className="w-full h-full object-cover transition-all duration-300"
+                  />
+                </div>
+                {/* Thumbnails row */}
+                {activeWisataPhotos.length > 1 && (
+                  <div className="flex gap-2.5 overflow-x-auto py-1">
+                    {activeWisataPhotos.map((photo, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActivePhotoIdx(i)}
+                        className={`h-16 w-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
+                          activePhotoIdx === i 
+                            ? 'border-[#2D5A27] dark:border-green-500 scale-95 shadow-sm' 
+                            : 'border-transparent opacity-65 hover:opacity-100'
+                        }`}
+                      >
+                        <img src={photo} alt="" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Right Side: Information & Comments */}
+              <div className="w-full md:w-1/2 flex flex-col justify-between max-h-[50vh] md:max-h-full">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-1 text-xs text-[#2D5A27] dark:text-green-400 font-bold uppercase tracking-wider">
+                    <MapPin size={14} />
+                    <span>Wisata Desa Benjor</span>
+                  </div>
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white leading-tight">
+                    {activeWisata.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed pb-4 border-b border-gray-100 dark:border-gray-800">
+                    {activeWisata.desc}
+                  </p>
+                </div>
+
+                {/* Comments List Section */}
+                <div className="flex-grow flex flex-col gap-4 mt-4 overflow-hidden">
+                  <h4 className="font-extrabold text-sm text-gray-800 dark:text-gray-200">
+                    Diskusi / Komentar ({activeWisata.comments?.length || 0})
+                  </h4>
+                  
+                  {/* Comments Scroll area */}
+                  <div className="flex-grow overflow-y-auto max-h-56 pr-2 flex flex-col gap-3 scrollbar-thin">
+                    {activeWisata.comments && activeWisata.comments.length > 0 ? (
+                      activeWisata.comments.map((comment) => (
+                        <div key={comment.id} className="bg-gray-50 dark:bg-gray-850 p-3.5 rounded-2xl relative group/item border border-gray-100/50 dark:border-gray-800/40">
+                          <div className="flex justify-between items-start">
+                            <span className="font-bold text-xs text-gray-900 dark:text-white">{comment.name}</span>
+                            <span className="text-[10px] text-gray-400 dark:text-gray-550 font-medium">{comment.date}</span>
+                          </div>
+                          <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 leading-relaxed">{comment.text}</p>
+                          
+                          {/* Admin delete comment option */}
+                          {isAdmin && (
+                            <button
+                              onClick={() => handleDeleteComment(activeWisata.id, comment.id)}
+                              className="absolute top-2.5 right-2.5 p-1 rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors opacity-0 group-hover/item:opacity-100 cursor-pointer"
+                              title="Hapus komentar"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-gray-400 dark:text-gray-500 italic py-4 text-center">Belum ada komentar. Jadilah yang pertama memberikan pendapat!</p>
+                    )}
+                  </div>
+
+                  {/* Add comment Form */}
+                  <form onSubmit={(e) => handleAddComment(e, activeWisata.id)} className="flex flex-col gap-2 mt-2 pt-3 border-t border-gray-100 dark:border-gray-800">
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        placeholder="Nama Anda"
+                        value={commentName}
+                        onChange={(e) => setCommentName(e.target.value)}
+                        required
+                        className="w-1/3 text-xs p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#2D5A27] dark:focus:border-green-500"
+                      />
+                      <input 
+                        type="text" 
+                        placeholder="Tulis pendapat/komentar Anda..."
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        required
+                        className="w-2/3 text-xs p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-850 text-gray-900 dark:text-white focus:outline-none focus:border-[#2D5A27] dark:focus:border-green-500"
+                      />
+                      <button 
+                        type="submit" 
+                        disabled={isSubmittingComment}
+                        className="bg-[#2D5A27] hover:bg-green-700 text-white font-bold p-2.5 rounded-xl transition-all shadow hover:shadow-md disabled:opacity-50 flex items-center justify-center cursor-pointer"
+                      >
+                        <Send size={14} />
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

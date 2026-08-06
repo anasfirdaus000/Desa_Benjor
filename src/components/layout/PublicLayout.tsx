@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, MapPin, Mail, Phone } from 'lucide-react';
+import { Menu, X, MapPin, Mail, Phone, Sun, Moon } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -9,8 +9,33 @@ const PublicLayout = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showGrandIntro, setShowGrandIntro] = useState(false);
   const [isIntroFinished, setIsIntroFinished] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const location = useLocation();
   const { villageInfo } = useAppContext();
+
+  // Dark Mode Initializer
+  useEffect(() => {
+    const theme = localStorage.getItem('theme');
+    if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      setDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      setDarkMode(false);
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    if (darkMode) {
+      setDarkMode(false);
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    } else {
+      setDarkMode(true);
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    }
+  };
 
   useEffect(() => {
     const lastVisit = localStorage.getItem('last_visit_benjor');
@@ -63,14 +88,14 @@ const PublicLayout = () => {
     { name: 'UMKM Desa', path: '/umkm' },
     { name: 'Infografis', path: '/infografis' },
     { name: 'Berita', path: '/berita' },
-    { name: 'Galeri Wisata', path: '/galeri' },
+    { name: 'Wisata Desa Benjor', path: '/galeri' },
   ];
 
   const isHome = location.pathname === '/';
   const useTransparent = isHome && !isScrolled;
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-gray-50/50">
+    <div className="min-h-screen flex flex-col font-sans bg-gray-50/50 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300">
       {/* Grand Opening Intro overlay */}
       <AnimatePresence>
         {showGrandIntro && (
@@ -123,15 +148,16 @@ const PublicLayout = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
       {/* Navbar Wrapper */}
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         useTransparent 
           ? 'bg-transparent text-white' 
-          : 'bg-white shadow-md'
+          : 'bg-white dark:bg-gray-900/95 dark:backdrop-blur-md text-gray-800 dark:text-gray-100 shadow-md border-b dark:border-gray-800'
       }`}>
         {/* Main Navbar */}
         <nav className={`transition-all duration-300 ${
-          useTransparent ? 'bg-transparent border-b border-white/10' : 'bg-white border-b border-gray-100'
+          useTransparent ? 'bg-transparent border-b border-white/10' : 'bg-transparent'
         }`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-20 items-center">
@@ -147,12 +173,12 @@ const PublicLayout = () => {
                   </motion.div>
                   <div>
                     <h1 className={`font-extrabold text-lg leading-tight transition-colors duration-300 ${
-                      useTransparent ? 'text-white' : 'text-[#2D5A27]'
+                      useTransparent ? 'text-white' : 'text-[#2D5A27] dark:text-green-400'
                     }`}>
                       DESA BENJOR
                     </h1>
                     <p className={`text-xxs transition-colors duration-300 ${
-                      useTransparent ? 'text-green-100' : 'text-gray-400'
+                      useTransparent ? 'text-green-100' : 'text-gray-400 dark:text-gray-400'
                     }`}>
                       Kabupaten Malang
                     </p>
@@ -172,36 +198,59 @@ const PublicLayout = () => {
                           ? 'bg-white/20 text-white shadow-sm'
                           : 'text-white/90 hover:bg-white/10 hover:text-white'
                         : location.pathname === link.path
-                          ? 'bg-green-50 text-[#2D5A27]'
-                          : 'text-gray-700 hover:bg-green-50 hover:text-[#2D5A27]'
+                          ? 'bg-green-50 dark:bg-green-950/40 text-[#2D5A27] dark:text-green-400'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-gray-800 hover:text-[#2D5A27] dark:hover:text-green-400'
                     }`}
                   >
                     {link.name}
                   </Link>
                 ))}
                 {/* Admin Login Button next to links */}
-                <div className="pl-4">
+                <div className="pl-2">
                   <Link
                     to="/login"
                     className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 border ${
                       useTransparent
                         ? 'border-white/40 hover:bg-white text-white hover:text-[#2D5A27]'
-                        : 'border-[#2D5A27] bg-[#2D5A27] hover:bg-green-700 text-white hover:shadow'
+                        : 'border-[#2D5A27] dark:border-green-600 bg-[#2D5A27] dark:bg-green-600 hover:bg-green-700 dark:hover:bg-green-700 text-white hover:shadow'
                     }`}
                   >
                     Admin Login
                   </Link>
                 </div>
+                {/* Dark Mode Toggle */}
+                <button
+                  onClick={toggleDarkMode}
+                  className={`p-2.5 rounded-lg border transition-all duration-300 ml-2 ${
+                    useTransparent
+                      ? 'border-white/25 hover:bg-white/10 text-white'
+                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'
+                  }`}
+                  aria-label="Toggle theme"
+                >
+                  {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+                </button>
               </div>
 
               {/* Mobile Menu Button */}
-              <div className="md:hidden flex items-center">
+              <div className="md:hidden flex items-center gap-2">
+                {/* Mobile Dark Mode Toggle */}
+                <button
+                  onClick={toggleDarkMode}
+                  className={`p-2 rounded-md transition-colors ${
+                    useTransparent 
+                      ? 'text-white hover:bg-white/10' 
+                      : 'text-gray-750 hover:text-[#2D5A27] dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+                </button>
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                   className={`p-2 rounded-md transition-colors ${
                     useTransparent 
                       ? 'text-white hover:bg-white/10' 
-                      : 'text-gray-700 hover:text-[#2D5A27] hover:bg-green-50'
+                      : 'text-gray-700 hover:text-[#2D5A27] dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-800'
                   }`}
                 >
                   {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -212,7 +261,7 @@ const PublicLayout = () => {
 
           {/* Mobile Menu */}
           {isMobileMenuOpen && (
-            <div className={`md:hidden border-t ${useTransparent ? 'bg-black/90 backdrop-blur-md border-white/10' : 'bg-white'}`}>
+            <div className={`md:hidden border-t ${useTransparent ? 'bg-black/90 backdrop-blur-md border-white/10' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'}`}>
               <div className="px-2 pt-2 pb-4 space-y-1 sm:px-3">
                 {navLinks.map((link) => (
                   <Link
@@ -225,8 +274,8 @@ const PublicLayout = () => {
                           ? 'bg-white/20 text-white'
                           : 'text-white/80 hover:bg-white/10 hover:text-white'
                         : location.pathname === link.path
-                          ? 'bg-green-50 text-[#2D5A27]'
-                          : 'text-gray-700 hover:bg-green-50 hover:text-[#2D5A27]'
+                          ? 'bg-green-50 dark:bg-green-950/40 text-[#2D5A27] dark:text-green-400'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-gray-800 hover:text-[#2D5A27] dark:hover:text-green-400'
                     }`}
                   >
                     {link.name}
@@ -238,8 +287,8 @@ const PublicLayout = () => {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`block px-3 py-2 rounded-md text-base font-bold transition-colors ${
                     useTransparent
-                      ? 'text-green-300 hover:bg-white/10 hover:text-white'
-                      : 'text-[#2D5A27] hover:bg-green-50'
+                      ? 'text-white/80 hover:bg-white/10 hover:text-white'
+                      : 'text-[#2D5A27] dark:text-green-400 hover:bg-green-50 dark:hover:bg-gray-800'
                   }`}
                 >
                   Admin Login
@@ -252,22 +301,11 @@ const PublicLayout = () => {
 
       {/* Main content body (Home page has pt-0 so hero goes full screen, subpages have pt-20 to clear navbar) */}
       <main className={`flex-grow ${isHome ? 'pt-0' : 'pt-20'}`}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="flex-grow flex flex-col"
-          >
-            <Outlet />
-          </motion.div>
-        </AnimatePresence>
+        <Outlet />
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white pt-16 pb-8">
+      <footer className="bg-gray-900 dark:bg-gray-950 text-white pt-16 pb-8 border-t dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div>
@@ -289,6 +327,7 @@ const PublicLayout = () => {
                 <li><Link to="/umkm" className="hover:text-white transition-colors">UMKM Desa</Link></li>
                 <li><Link to="/infografis" className="hover:text-white transition-colors">Infografis</Link></li>
                 <li><Link to="/berita" className="hover:text-white transition-colors">Berita Desa</Link></li>
+                <li><Link to="/galeri" className="hover:text-white transition-colors font-medium text-green-400">Wisata Desa Benjor</Link></li>
               </ul>
             </div>
             <div>
@@ -305,20 +344,6 @@ const PublicLayout = () => {
           </div>
         </div>
       </footer>
-
-      {/* Short Wipe Curtain Page Transition Overlay for Menu Navigation */}
-      {isIntroFinished && (
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`wipe-${location.pathname}`}
-            initial={{ scaleY: 0 }}
-            animate={{ scaleY: [0, 1, 0] }}
-            transition={{ duration: 0.6, times: [0, 0.45, 1], ease: "easeInOut" }}
-            style={{ originY: 1 }}
-            className="fixed inset-0 bg-[#2D5A27] z-[99999] pointer-events-none"
-          />
-        </AnimatePresence>
-      )}
     </div>
   );
 };

@@ -34,6 +34,22 @@ export interface Berita {
   image: string;
 }
 
+export interface Comment {
+  id: string;
+  name: string;
+  text: string;
+  date: string;
+}
+
+export interface Wisata {
+  id: string;
+  title: string;
+  image: string;
+  images?: string[];
+  desc: string;
+  comments: Comment[];
+}
+
 export interface InfografisData {
   penduduk: {
     labels: string[];
@@ -88,6 +104,8 @@ export interface AppState {
   infografis: InfografisData;
   villageInfo: VillageInfo;
   adminProfile: AdminProfile;
+  wisata: Wisata[];
+  fetchWisata: () => Promise<void>;
   setSliderImages: React.Dispatch<React.SetStateAction<SliderImage[]>>;
   setSotk: React.Dispatch<React.SetStateAction<SOTK[]>>;
   setUmkm: React.Dispatch<React.SetStateAction<UMKM[]>>;
@@ -158,6 +176,11 @@ const initialAdminProfile = {
   email: 'admin@benjor.desa.id'
 };
 
+const initialWisata: Wisata[] = [
+  { id: '1', title: 'Wisata Siling Kanu - Air Terjun Utama', image: '/tamang_files/000eb415acb85e5560517e3dc2775072.jpg', desc: 'Pesona air terjun tersembunyi dengan alam yang asri.', comments: [] },
+  { id: '2', title: 'Wisata Bukit Bongku - Spot Foto Awan', image: '/tamang_files/f26e073b8124a077d194a810e3f2f3a1.jpg', desc: 'Keindahan pemandangan dari puncak bukit di pagi hari.', comments: [] }
+];
+
 // Dynamic helper to resolve localhost vs production base endpoint
 const getApiUrl = (path: string) => {
   const API_BASE = import.meta.env.PROD ? '' : 'http://localhost:5000';
@@ -174,6 +197,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [infografis, setInfografis] = useState<InfografisData>(initialInfografis);
   const [villageInfo, setVillageInfo] = useState<VillageInfo>(initialVillageInfo);
   const [adminProfile, setAdminProfile] = useState<AdminProfile>(initialAdminProfile);
+  const [wisata, setWisata] = useState<Wisata[]>(initialWisata);
+
+  const fetchWisata = async () => {
+    try {
+      const res = await fetch(getApiUrl('/api/wisata'));
+      if (res.ok) setWisata(await res.json());
+    } catch (e) {
+      console.warn('Gagal mengambil data wisata dari backend', e);
+    }
+  };
 
   // 1. Fetch data from backend on mount, falling back gracefully to initial static mock data
   useEffect(() => {
@@ -196,6 +229,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
         const infoGRes = await fetch(getApiUrl('/api/infografis'));
         if (infoGRes.ok) setInfografis(await infoGRes.json());
+
+        await fetchWisata();
       } catch (err) {
         console.warn('Backend API is offline or not set up. Falling back to local static mock data.', err);
       }
@@ -341,7 +376,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   return (
     <AppContext.Provider value={{
-      sliderImages, sotk, umkm, berita, infografis, villageInfo, adminProfile,
+      sliderImages, sotk, umkm, berita, infografis, villageInfo, adminProfile, wisata,
+      fetchWisata,
       setSliderImages: handleSetSliderImages,
       setSotk: handleSetSotk,
       setUmkm: handleSetUmkm,
@@ -354,23 +390,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     </AppContext.Provider>
   );
 };
-
-export interface AppState {
-  sliderImages: SliderImage[];
-  sotk: SOTK[];
-  umkm: UMKM[];
-  berita: Berita[];
-  infografis: InfografisData;
-  villageInfo: VillageInfo;
-  adminProfile: AdminProfile;
-  setSliderImages: React.Dispatch<React.SetStateAction<SliderImage[]>>;
-  setSotk: React.Dispatch<React.SetStateAction<SOTK[]>>;
-  setUmkm: React.Dispatch<React.SetStateAction<UMKM[]>>;
-  setBerita: React.Dispatch<React.SetStateAction<Berita[]>>;
-  setInfografis: React.Dispatch<React.SetStateAction<InfografisData>>;
-  setVillageInfo: React.Dispatch<React.SetStateAction<VillageInfo>>;
-  setAdminProfile: React.Dispatch<React.SetStateAction<AdminProfile>>;
-}
 
 export const useAppContext = () => {
   const context = useContext(AppContext);

@@ -38,5 +38,170 @@
       "email": "info@benjor.desa.id",
       "phone": "(0341) 789012"
     }
-  }
+  },
+  "wisata": [
+    {
+      "id": "1",
+      "title": "Wisata Siling Kanu - Air Terjun Utama",
+      "image": "/tamang_files/000eb415acb85e5560517e3dc2775072.jpg",
+      "images": [
+        "/tamang_files/000eb415acb85e5560517e3dc2775072.jpg",
+        "https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80"
+      ],
+      "desc": "Pesona air terjun tersembunyi dengan alam yang asri di Desa Benjor, menawarkan kesegaran air pegunungan yang murni dan pemandangan hijau di sekelilingnya.",
+      "comments": [
+        { "id": "1", "name": "Budi", "text": "Pemandangannya sangat indah dan udaranya sejuk sekali!", "date": "2026-08-01" }
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Wisata Bukit Bongku - Spot Foto Awan",
+      "image": "/tamang_files/f26e073b8124a077d194a810e3f2f3a1.jpg",
+      "images": [
+        "/tamang_files/f26e073b8124a077d194a810e3f2f3a1.jpg",
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&q=80"
+      ],
+      "desc": "Keindahan pemandangan dari puncak bukit di pagi hari di mana Anda serasa berdiri di atas awan, menjadikannya spot foto terpopuler bagi kaum muda.",
+      "comments": [
+        { "id": "1", "name": "Dewi", "text": "Datang pagi hari sebelum subuh, pemandangan sunrise-nya juara banget!", "date": "2026-08-02" }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Pesona Lembah Benjor - Lanskap Hijau",
+      "image": "/tamang_files/25305b13929576d65d9296b09ddb4b2c.jpg",
+      "images": [
+        "/tamang_files/25305b13929576d65d9296b09ddb4b2c.jpg",
+        "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&q=80"
+      ],
+      "desc": "Hamparan lembah hijau yang menenangkan jiwa dengan sawah terasering tradisional dan aliran air yang mengalir tenang sepanjang tahun.",
+      "comments": []
+    },
+    {
+      "id": "4",
+      "title": "Keasrian Hutan Desa - Flora Lokal",
+      "image": "/tamang_files/aaf8b88f7a33350eaa289c6ed07d0bc1.jpeg",
+      "images": [
+        "/tamang_files/aaf8b88f7a33350eaa289c6ed07d0bc1.jpeg",
+        "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&q=80"
+      ],
+      "desc": "Hutan desa rimbun penunjang ekosistem mata air utama, rumah bagi berbagai tanaman hias langka dan aneka flora tropis asli Malang.",
+      "comments": []
+    },
+    {
+      "id": "5",
+      "title": "Sungai Bersih - Aliran Benjor",
+      "image": "/tamang_files/1f8fa6396f6bd336ad793a4c88e37e18.jpeg",
+      "images": [
+        "/tamang_files/1f8fa6396f6bd336ad793a4c88e37e18.jpeg",
+        "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&q=80"
+      ],
+      "desc": "Aliran sungai jernih dari pegunungan Malang, sangat cocok untuk aktivitas river tubing ringan atau sekadar bermain air bersama keluarga.",
+      "comments": []
+    },
+    {
+      "id": "6",
+      "title": "Rimbun Pinus - Area Camping",
+      "image": "/tamang_files/2536e945bc9b6bde053777264de2b75f.jpeg",
+      "images": [
+        "/tamang_files/2536e945bc9b6bde053777264de2b75f.jpeg",
+        "https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&q=80"
+      ],
+      "desc": "Camping ground asri di bawah pohon pinus yang rindang. Menawarkan suasana malam hari bertabur bintang yang tenang dan romantis.",
+      "comments": []
+    },
+    {
+      "id": "7",
+      "title": "Pertanian Terpadu - Hasil Tani",
+      "image": "/tamang_files/a6085185b28d0ded30d077c9c80e27f7.jpg",
+      "images": [
+        "/tamang_files/a6085185b28d0ded30d077c9c80e27f7.jpg"
+      ],
+      "desc": "Perkebunan lokal penghasil produk organik unggulan seperti sayuran, buah-buahan segar, dan tanaman herbal yang dikelola secara gotong royong.",
+      "comments": []
+    },
+    {
+      "id": "8",
+      "title": "Pesona Air Terjun Mini",
+      "image": "/tamang_files/8d94257a2f2d6703d03fb0385cb775e0.jpeg",
+      "images": [
+        "/tamang_files/8d94257a2f2d6703d03fb0385cb775e0.jpeg"
+      ],
+      "desc": "Aliran jeram kecil di sepanjang trekking wisata yang menyuguhkan pemandangan air mengalir di antara sela-sela bebatuan vulkanis alami.",
+      "comments": []
+    },
+    {
+      "id": "9",
+      "title": "Sunset Lembah Benjor",
+      "image": "/tamang_files/29ce51f1e4ff8000b7b5e586ee73672a.jpeg",
+      "images": [
+        "/tamang_files/29ce51f1e4ff8000b7b5e586ee73672a.jpeg"
+      ],
+      "desc": "Pemandangan matahari terbenam yang memukau dengan langit jingga merona di atas lembah Desa Benjor.",
+      "comments": []
+    },
+    {
+      "id": "10",
+      "title": "Pesona Hutan Bambu Desa",
+      "image": "https://images.unsplash.com/photo-1590736969955-71cc94801759?auto=format&fit=crop&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1590736969955-71cc94801759?auto=format&fit=crop&q=80"
+      ],
+      "desc": "Hutan bambu alami yang menjadi sumber bahan baku kerajinan anyaman bambu khas warga desa.",
+      "comments": []
+    },
+    {
+      "id": "11",
+      "title": "Perkebunan Kopi Lereng Gunung",
+      "image": "https://images.unsplash.com/photo-1559525839-b184a4d698c7?auto=format&fit=crop&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1559525839-b184a4d698c7?auto=format&fit=crop&q=80"
+      ],
+      "desc": "Tanaman kopi robusta unggulan petani Benjor yang ditanam di ketinggian ideal lereng gunung.",
+      "comments": []
+    },
+    {
+      "id": "12",
+      "title": "Pesona Jalur Ekspedisi Hutan",
+      "image": "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80"
+      ],
+      "desc": "Jalur tracking pendakian asri menembus hutan pinus yang sangat digemari oleh para pecinta alam.",
+      "comments": []
+    },
+    {
+      "id": "13",
+      "title": "Pagi Hari Lembah Benjor",
+      "image": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80"
+      ],
+      "desc": "Udara berkabut yang menyejukkan di lereng bukit Desa Benjor di pagi hari.",
+      "comments": []
+    },
+    {
+      "id": "14",
+      "title": "Pertanian Singkong Desa",
+      "image": "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&q=80"
+      ],
+      "desc": "Lahan singkong luas sebagai penunjang industri kuliner olahan kripik singkong mandiri.",
+      "comments": []
+    },
+    {
+      "id": "15",
+      "title": "Wisata Budaya - Bersih Desa",
+      "image": "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&q=80"
+      ],
+      "desc": "Upacara adat tahunan bersih desa yang diwariskan oleh leluhur sebagai wujud syukur hasil bumi.",
+      "comments": []
+    }
+  ]
 }

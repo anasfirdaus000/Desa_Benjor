@@ -282,6 +282,47 @@ app.put('/api/infografis', (req, res) => {
   res.json(db.infografis);
 });
 
+// --- WISATA & KOMENTAR API ---
+app.get('/api/wisata', (req, res) => {
+  const db = readDb();
+  res.json(db.wisata || []);
+});
+
+app.post('/api/wisata/:id/comments', (req, res) => {
+  const { name, text } = req.body;
+  if (!name || !text) {
+    return res.status(400).json({ message: 'Nama dan komentar tidak boleh kosong!' });
+  }
+  const db = readDb();
+  const wisataItem = db.wisata?.find(w => w.id === req.params.id);
+  if (!wisataItem) {
+    return res.status(404).json({ message: 'Objek wisata tidak ditemukan!' });
+  }
+  const newComment = {
+    id: String(Date.now()),
+    name,
+    text,
+    date: new Date().toISOString().split('T')[0]
+  };
+  if (!wisataItem.comments) wisataItem.comments = [];
+  wisataItem.comments.push(newComment);
+  writeDb(db);
+  res.json(newComment);
+});
+
+app.delete('/api/wisata/:id/comments/:commentId', (req, res) => {
+  if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
+  const db = readDb();
+  const wisataItem = db.wisata?.find(w => w.id === req.params.id);
+  if (!wisataItem) {
+    return res.status(404).json({ message: 'Objek wisata tidak ditemukan!' });
+  }
+  if (!wisataItem.comments) wisataItem.comments = [];
+  wisataItem.comments = wisataItem.comments.filter(c => c.id !== req.params.commentId);
+  writeDb(db);
+  res.json({ message: 'Komentar berhasil dihapus' });
+});
+
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`🚀 Backend server is running on http://localhost:${PORT}`);
