@@ -30,8 +30,18 @@ app.use('/uploads', express.static(uploadsDir));
 const dbPath = path.join(__dirname, 'db.json');
 
 // --- SUPABASE CLIENT SETUP ---
-const supabaseUrl = process.env.SUPABASE_URL;
+let supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
+
+// Sanitize URL by removing /rest/v1 suffix if present
+if (supabaseUrl) {
+  supabaseUrl = supabaseUrl.trim();
+  if (supabaseUrl.endsWith('/rest/v1/')) {
+    supabaseUrl = supabaseUrl.replace(/\/rest\/v1\/$/, '');
+  } else if (supabaseUrl.endsWith('/rest/v1')) {
+    supabaseUrl = supabaseUrl.replace(/\/rest\/v1$/, '');
+  }
+}
 
 const hasSupabase = 
   supabaseUrl && 
