@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../../context/AppContext';
-import { ChevronLeft, ChevronRight, Eye, MessageCircle, MapPin, Camera, Star, Send, Trash2, X, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, MessageCircle, MapPin, Send, Trash2, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -39,7 +39,7 @@ const Home = () => {
     }
   };
 
-  // Resolve API Base URL for calls
+  // Resolve API Base URL dynamically
   const getApiUrl = (path: string) => {
     const API_BASE = import.meta.env.PROD ? '' : 'http://localhost:5000';
     return `${API_BASE}${path}`;
@@ -59,7 +59,7 @@ const Home = () => {
       });
       if (res.ok) {
         setCommentText('');
-        await fetchWisata(); // refresh database state
+        await fetchWisata(); // refresh context
       } else {
         alert('Gagal mengirimkan komentar.');
       }
@@ -98,6 +98,16 @@ const Home = () => {
     const cleanPhone = phone.replace(/^0+/, '62');
     const message = `Halo, saya tertarik untuk membeli produk *${productName}* yang ada di website Desa Benjor. Apakah stoknya masih tersedia?`;
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  // Formatting date to clean Indonesian format
+  const formatIndonesianDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    } catch (e) {
+      return dateStr;
+    }
   };
 
   // Demographic stats
@@ -318,7 +328,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Produk Unggulan Section - Unlocked with horizontal slide-scroll */}
+      {/* Produk Unggulan Section - Unlocked horizontal scroll with fanned visual look on desktop */}
       <section className="py-24 px-4 bg-gray-50/50 dark:bg-gray-950/60 relative overflow-hidden border-b border-gray-100 dark:border-gray-850">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -338,74 +348,81 @@ const Home = () => {
             {/* Navigation buttons */}
             <button 
               onClick={slideLeft} 
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
             >
               <ChevronLeft size={22} />
             </button>
             <button 
               onClick={slideRight} 
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
             >
               <ChevronRight size={22} />
             </button>
 
-            {/* Slider cards row */}
+            {/* Slider cards row - desktop gets fanned out tilted rotation cards, hovering straightens them! */}
             <div 
               ref={sliderRef}
-              className="flex gap-8 overflow-x-auto scroll-smooth snap-x snap-mandatory py-4 hide-scrollbar"
+              className="flex gap-8 overflow-x-auto scroll-smooth snap-x snap-mandatory py-8 px-4 hide-scrollbar"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {umkm.map((product) => (
-                <div 
-                  key={product.id}
-                  className="w-[280px] sm:w-[320px] bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-md dark:shadow-2xl border border-gray-100 dark:border-gray-800/80 flex flex-col justify-between flex-shrink-0 snap-center transform hover:-translate-y-1.5 transition-all duration-300"
-                >
-                  <Link to={`/umkm/${product.id}`} className="relative h-44 sm:h-52 overflow-hidden bg-gray-100 dark:bg-gray-800 block flex-shrink-0">
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-3 right-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-2.5 py-1 rounded-md text-xxs font-bold text-[#2D5A27] dark:text-green-400 shadow-sm border dark:border-gray-800">
-                      {product.category}
-                    </div>
-                  </Link>
-                  <div className="p-4 sm:p-5 flex-grow flex flex-col justify-between overflow-hidden">
-                    <div className="overflow-hidden">
-                      <Link to={`/umkm/${product.id}`} className="block hover:text-[#2D5A27] dark:hover:text-green-400 transition-colors">
-                        <h3 className="font-extrabold text-sm sm:text-base text-gray-900 dark:text-white mb-1 leading-snug line-clamp-1">{product.name}</h3>
-                      </Link>
-                      <p className="text-[#2D5A27] dark:text-green-400 font-black text-base sm:text-lg mb-2">
-                        Rp {product.price.toLocaleString('id-ID')}
-                      </p>
-                      <p className="text-gray-500 dark:text-gray-400 text-xxs sm:text-xs line-clamp-3 leading-relaxed mb-4">{product.description}</p>
-                    </div>
-                    
-                    <div className="flex-shrink-0">
-                      <div className="flex items-center gap-1.5 text-xxs text-gray-400 dark:text-gray-500 mb-3 pb-2 border-b border-gray-100 dark:border-gray-800">
-                        <span>Pemilik: <strong className="text-gray-600 dark:text-gray-300 font-semibold">{product.owner}</strong></span>
-                      </div>
+              {umkm.map((product, idx) => {
+                // Calculate rotation dynamically to create the fanned card deck appearance on desktop
+                // Card 0: -3deg, Card 1: 0deg, Card 2: 3deg, Card 3: -2deg, etc.
+                const rotations = ['rotate-[-3deg] translate-y-1.5', 'rotate-[0deg]', 'rotate-[3deg] translate-y-1.5', 'rotate-[-2deg]', 'rotate-[2deg]'];
+                const cardRotationClass = rotations[idx % rotations.length];
 
-                      <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                        <Link 
-                          to={`/umkm/${product.id}`}
-                          className="flex items-center justify-center gap-1 border border-gray-200 dark:border-gray-700 hover:border-[#2D5A27] dark:hover:border-green-500 text-gray-700 dark:text-gray-300 hover:text-[#2D5A27] dark:hover:text-green-400 font-bold py-2 px-3 rounded-xl transition-colors text-xxs"
-                        >
-                          <Eye size={12} />
-                          Detail
+                return (
+                  <div 
+                    key={product.id}
+                    className={`w-[280px] sm:w-[320px] bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-md dark:shadow-2xl border border-gray-100 dark:border-gray-800/85 flex flex-col justify-between flex-shrink-0 snap-center md:${cardRotationClass} hover:rotate-0 hover:-translate-y-2 transition-all duration-300`}
+                  >
+                    <Link to={`/umkm/${product.id}`} className="relative h-44 sm:h-52 overflow-hidden bg-gray-100 dark:bg-gray-800 block flex-shrink-0">
+                      <img 
+                        src={product.image} 
+                        alt={product.name} 
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-3 right-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-2.5 py-1 rounded-md text-xxs font-bold text-[#2D5A27] dark:text-green-450 shadow-sm border dark:border-gray-800">
+                        {product.category}
+                      </div>
+                    </Link>
+                    <div className="p-4 sm:p-5 flex-grow flex flex-col justify-between overflow-hidden">
+                      <div className="overflow-hidden">
+                        <Link to={`/umkm/${product.id}`} className="block hover:text-[#2D5A27] dark:hover:text-green-400 transition-colors">
+                          <h3 className="font-extrabold text-sm sm:text-base text-gray-900 dark:text-white mb-1 leading-snug line-clamp-1">{product.name}</h3>
                         </Link>
-                        <button 
-                          onClick={() => handleBuyWA(product.wa, product.name)}
-                          className="flex items-center justify-center gap-1 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-2 px-3 rounded-xl transition-colors text-xxs shadow-sm hover:shadow"
-                        >
-                          <MessageCircle size={12} />
-                          Beli via WA
-                        </button>
+                        <p className="text-[#2D5A27] dark:text-green-400 font-black text-base sm:text-lg mb-2">
+                          Rp {product.price.toLocaleString('id-ID')}
+                        </p>
+                        <p className="text-gray-505 dark:text-gray-400 text-xxs sm:text-xs line-clamp-3 leading-relaxed mb-4">{product.description}</p>
+                      </div>
+                      
+                      <div className="flex-shrink-0">
+                        <div className="flex items-center gap-1.5 text-xxs text-gray-400 dark:text-gray-500 mb-3 pb-2 border-b border-gray-100 dark:border-gray-800">
+                          <span>Pemilik: <strong className="text-gray-600 dark:text-gray-300 font-semibold">{product.owner}</strong></span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                          <Link 
+                            to={`/umkm/${product.id}`}
+                            className="flex items-center justify-center gap-1 border border-gray-200 dark:border-gray-700 hover:border-[#2D5A27] dark:hover:border-green-500 text-gray-700 dark:text-gray-300 hover:text-[#2D5A27] dark:hover:text-green-400 font-bold py-2 px-3 rounded-xl transition-colors text-xxs"
+                          >
+                            <Eye size={12} />
+                            Detail
+                          </Link>
+                          <button 
+                            onClick={() => handleBuyWA(product.wa, product.name)}
+                            className="flex items-center justify-center gap-1 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-2 px-3 rounded-xl transition-colors text-xxs shadow-sm hover:shadow cursor-pointer"
+                          >
+                            <MessageCircle size={12} />
+                            Beli via WA
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -419,7 +436,7 @@ const Home = () => {
             <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mt-2 mb-2 tracking-tight">Kabar Desa Terbaru</h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm">Berita, kegiatan masyarakat, and pengumuman resmi Desa Benjor.</p>
           </div>
-          <Link to="/berita" className="bg-white dark:bg-gray-900 hover:bg-green-50 dark:hover:bg-gray-800 text-[#2D5A27] dark:text-green-400 border border-gray-200 dark:border-gray-700 font-semibold px-5 py-2.5 rounded-lg shadow-sm hover:shadow transition-all duration-300">
+          <Link to="/berita" className="bg-white dark:bg-gray-900 hover:bg-green-50 dark:hover:bg-gray-850 text-[#2D5A27] dark:text-green-400 border border-gray-200 dark:border-gray-700 font-semibold px-5 py-2.5 rounded-lg shadow-sm hover:shadow transition-all duration-300">
             Lihat Semua Kabar &rarr;
           </Link>
         </div>
@@ -442,7 +459,7 @@ const Home = () => {
                 </span>
               </div>
               <div className="p-6 flex flex-col flex-grow">
-                <span className="text-xs text-gray-400 dark:text-gray-500 font-medium mb-3">
+                <span className="text-xs text-gray-400 dark:text-gray-550 font-medium mb-3">
                   {new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </span>
                 <h3 className="font-bold text-lg mb-3 text-gray-900 dark:text-white group-hover:text-[#2D5A27] dark:group-hover:text-green-400 transition-colors line-clamp-2 leading-snug">
@@ -476,7 +493,7 @@ const Home = () => {
               <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mt-2 mb-4 tracking-tight drop-shadow-sm">
                 Wisata Desa Benjor
               </h2>
-              <p className="text-gray-700 dark:text-gray-200 text-base leading-relaxed font-semibold">
+              <p className="text-gray-750 dark:text-gray-200 text-base leading-relaxed font-semibold">
                 Menampilkan keindahan alam, destinasi wisata unggulan, dan keasrian lingkungan di Desa Benjor.
               </p>
             </div>
@@ -542,7 +559,7 @@ const Home = () => {
       {/* Wisata Detail Popup Modal with comments CRUD */}
       <AnimatePresence>
         {selectedWisataId && activeWisata && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/85 backdrop-blur-sm p-4">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -552,28 +569,56 @@ const Home = () => {
               {/* Close Button */}
               <button 
                 onClick={() => setSelectedWisataId(null)}
-                className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-250 dark:hover:bg-gray-700 transition-colors z-20"
+                className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 dark:bg-gray-850 text-gray-650 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors z-20 cursor-pointer"
               >
                 <X size={20} />
               </button>
 
-              {/* Left Side: Photo slideshow gallery */}
+              {/* Left Side: Photo slideshow gallery with Arrow Navigation buttons */}
               <div className="w-full md:w-1/2 flex flex-col gap-4">
-                <div className="h-64 sm:h-80 w-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 relative shadow">
+                <div className="h-64 sm:h-80 w-full rounded-2xl overflow-hidden bg-gray-105 dark:bg-gray-850 relative shadow group">
                   <img 
                     src={activeWisataPhotos[activePhotoIdx]} 
                     alt={activeWisata.title} 
                     className="w-full h-full object-cover transition-all duration-300"
                   />
+                  {/* Photo slides arrow navigation overlays */}
+                  {activeWisataPhotos.length > 1 && (
+                    <>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActivePhotoIdx(prev => (prev === 0 ? activeWisataPhotos.length - 1 : prev - 1));
+                        }}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 hover:bg-[#2D5A27] text-white backdrop-blur-sm transition-all duration-300 opacity-0 group-hover:opacity-100 shadow cursor-pointer"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActivePhotoIdx(prev => (prev === activeWisataPhotos.length - 1 ? 0 : prev + 1));
+                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 hover:bg-[#2D5A27] text-white backdrop-blur-sm transition-all duration-300 opacity-0 group-hover:opacity-100 shadow cursor-pointer"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </>
+                  )}
+                  {/* Image counter indicator */}
+                  <div className="absolute bottom-3 right-3 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded backdrop-blur-sm">
+                    {activePhotoIdx + 1} / {activeWisataPhotos.length}
+                  </div>
                 </div>
+
                 {/* Thumbnails row */}
                 {activeWisataPhotos.length > 1 && (
-                  <div className="flex gap-2.5 overflow-x-auto py-1">
+                  <div className="flex gap-2.5 overflow-x-auto py-1 hide-scrollbar">
                     {activeWisataPhotos.map((photo, i) => (
                       <button
                         key={i}
                         onClick={() => setActivePhotoIdx(i)}
-                        className={`h-16 w-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
+                        className={`h-16 w-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
                           activePhotoIdx === i 
                             ? 'border-[#2D5A27] dark:border-green-500 scale-95 shadow-sm' 
                             : 'border-transparent opacity-65 hover:opacity-100'
@@ -596,14 +641,14 @@ const Home = () => {
                   <h3 className="text-2xl font-black text-gray-900 dark:text-white leading-tight">
                     {activeWisata.title}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed pb-4 border-b border-gray-100 dark:border-gray-800">
+                  <p className="text-gray-650 dark:text-gray-300 text-sm leading-relaxed pb-4 border-b border-gray-100 dark:border-gray-800">
                     {activeWisata.desc}
                   </p>
                 </div>
 
                 {/* Comments List Section */}
                 <div className="flex-grow flex flex-col gap-4 mt-4 overflow-hidden">
-                  <h4 className="font-extrabold text-sm text-gray-800 dark:text-gray-200">
+                  <h4 className="font-extrabold text-sm text-gray-800 dark:text-gray-250">
                     Diskusi / Komentar ({activeWisata.comments?.length || 0})
                   </h4>
                   
@@ -611,12 +656,19 @@ const Home = () => {
                   <div className="flex-grow overflow-y-auto max-h-56 pr-2 flex flex-col gap-3 scrollbar-thin">
                     {activeWisata.comments && activeWisata.comments.length > 0 ? (
                       activeWisata.comments.map((comment) => (
-                        <div key={comment.id} className="bg-gray-50 dark:bg-gray-850 p-3.5 rounded-2xl relative group/item border border-gray-100/50 dark:border-gray-800/40">
-                          <div className="flex justify-between items-start">
-                            <span className="font-bold text-xs text-gray-900 dark:text-white">{comment.name}</span>
-                            <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">{comment.date}</span>
+                        <div key={comment.id} className="bg-gray-50/70 dark:bg-gray-850/60 p-3.5 rounded-2xl relative group/item border border-gray-100/60 dark:border-gray-800/40 flex items-start gap-3">
+                          {/* User Avatar Initials */}
+                          <div className="w-8 h-8 rounded-full bg-[#2D5A27]/10 dark:bg-green-950/40 text-[#2D5A27] dark:text-green-400 font-bold text-xs flex items-center justify-center flex-shrink-0 border border-[#2D5A27]/10">
+                            {comment.name.charAt(0).toUpperCase()}
                           </div>
-                          <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 leading-relaxed">{comment.text}</p>
+                          
+                          <div className="flex-grow min-w-0">
+                            <div className="flex justify-between items-baseline mb-1">
+                              <span className="font-extrabold text-xs text-gray-900 dark:text-white truncate pr-2">{comment.name}</span>
+                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium flex-shrink-0">{formatIndonesianDate(comment.date)}</span>
+                            </div>
+                            <p className="text-xs text-gray-650 dark:text-gray-300 leading-relaxed break-words">{comment.text}</p>
+                          </div>
                           
                           {/* Admin delete comment option */}
                           {isAdmin && (
@@ -631,7 +683,10 @@ const Home = () => {
                         </div>
                       ))
                     ) : (
-                      <p className="text-xs text-gray-400 dark:text-gray-550 italic py-4 text-center">Belum ada komentar. Jadilah yang pertama memberikan pendapat!</p>
+                      <div className="text-center py-6">
+                        <p className="text-xs text-gray-400 dark:text-gray-550 italic mb-1">Belum ada komentar.</p>
+                        <p className="text-[11px] text-gray-405 dark:text-gray-500">Jadilah yang pertama untuk menulis komentar di bawah!</p>
+                      </div>
                     )}
                   </div>
 
@@ -644,15 +699,15 @@ const Home = () => {
                         value={commentName}
                         onChange={(e) => setCommentName(e.target.value)}
                         required
-                        className="w-1/3 text-xs p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-55 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#2D5A27] dark:focus:border-green-500"
+                        className="w-1/3 text-xs p-2.5 rounded-xl border border-gray-250 dark:border-gray-700 bg-gray-50 dark:bg-gray-850 text-gray-900 dark:text-white focus:outline-none focus:border-[#2D5A27] dark:focus:border-green-500"
                       />
                       <input 
                         type="text" 
-                        placeholder="Tulis pendapat/komentar Anda..."
+                        placeholder="Tulis komentar Anda..."
                         value={commentText}
                         onChange={(e) => setCommentText(e.target.value)}
                         required
-                        className="w-2/3 text-xs p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-55 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#2D5A27] dark:focus:border-green-500"
+                        className="w-2/3 text-xs p-2.5 rounded-xl border border-gray-250 dark:border-gray-700 bg-gray-50 dark:bg-gray-850 text-gray-900 dark:text-white focus:outline-none focus:border-[#2D5A27] dark:focus:border-green-500"
                       />
                       <button 
                         type="submit" 

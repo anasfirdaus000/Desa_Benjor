@@ -14,15 +14,15 @@ const BeritaDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-850 dark:text-gray-100 py-12 transition-colors duration-300">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <Link to="/berita" className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-[#2D5A27] transition-colors mb-8">
+        <Link to="/berita" className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-[#2D5A27] dark:hover:text-green-400 transition-colors mb-8">
           <ArrowLeft size={16} className="mr-2" />
           Kembali ke Berita
         </Link>
 
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 transition-colors">
           <div className="h-64 sm:h-96 w-full relative">
             <img 
               src={article.image} 
@@ -32,10 +32,10 @@ const BeritaDetail = () => {
           </div>
           
           <div className="p-8 md:p-12">
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-6">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-450 mb-6">
               <div className="flex items-center gap-1">
-                <Tag size={16} className="text-[#2D5A27]" />
-                <span className="font-medium text-[#2D5A27]">{article.category}</span>
+                <Tag size={16} className="text-[#2D5A27] dark:text-green-400" />
+                <span className="font-medium text-[#2D5A27] dark:text-green-400">{article.category}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Calendar size={16} />
@@ -43,13 +43,11 @@ const BeritaDetail = () => {
               </div>
             </div>
             
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 leading-tight">
+            <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-8 leading-tight tracking-tight">
               {article.title}
             </h1>
             
-            <div className="prose max-w-none text-gray-700 leading-relaxed">
-              {/* Using summary as content for now since we don't have full content field in interface, 
-                  but in a real app this would be article.content */}
+            <div className="prose max-w-none text-gray-700 dark:text-gray-300 leading-relaxed text-justify">
               {article.summary.split('\n').map((paragraph, idx) => (
                 <p key={idx} className="mb-4">{paragraph}</p>
               ))}
