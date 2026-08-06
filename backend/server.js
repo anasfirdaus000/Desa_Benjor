@@ -6,6 +6,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createClient } from '@supabase/supabase-js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,23 +29,90 @@ app.use('/uploads', express.static(uploadsDir));
 // Database path
 const dbPath = path.join(__dirname, 'db.json');
 
-// Helper to read database
-const readDb = () => {
+// --- SUPABASE CLIENT SETUP ---
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+
+const hasSupabase = 
+  supabaseUrl && 
+  supabaseUrl !== 'your_supabase_url' && 
+  supabaseKey && 
+  supabaseKey !== 'your_supabase_key';
+
+const supabase = hasSupabase ? createClient(supabaseUrl, supabaseKey) : null;
+
+if (supabase) {
+  console.log('⚡ Supabase database connection initialized successfully.');
+} else {
+  console.log('⚠️ Supabase not configured. Using local fallback database: /backend/db.json');
+}
+
+// Local read backup
+const readLocalDb = () => {
   try {
     const data = fs.readFileSync(dbPath, 'utf8');
     return JSON.parse(data);
   } catch (error) {
     console.error('Error reading db.json, returning empty structure:', error);
-    return { sliderImages: [], sotk: [], umkm: [], berita: [], infografis: {}, villageInfo: {} };
+    return { sliderImages: [], sotk: [], umkm: [], berita: [], infografis: {}, villageInfo: {}, wisata: [] };
   }
 };
 
-// Helper to write database
-const writeDb = (data) => {
+// Local write backup
+const writeLocalDb = (data) => {
   try {
     fs.writeFileSync(dbPath, JSON.stringify(data, null, 2), 'utf8');
   } catch (error) {
-    console.error('Error writing to db.json:', error);
+    console.error('Error writing local db.json:', error);
+  }
+};
+
+// Unified dynamic read interface (Supabase cloud first, local db.json fallback)
+const fetchDb = async () => {
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('desa_benjor_db')
+        .select('data')
+        .eq('id', 1)
+        .single();
+
+      if (data && data.data) {
+        return data.data;
+      }
+      
+      // If table is empty or row does not exist, initialize it
+      console.log('Supabase table empty or row not found. Initializing with default local data...');
+      const localData = readLocalDb();
+      await supabase.from('desa_benjor_db').upsert({ id: 1, data: localData });
+      return localData;
+    } catch (err) {
+      console.warn('Supabase query failed, falling back to local db.json:', err.message);
+      return readLocalDb();
+    }
+  }
+  return readLocalDb();
+};
+
+// Unified dynamic write interface (writes local backup and syncs to Supabase cloud)
+const saveDb = async (newData) => {
+  writeLocalDb(newData); // Always update local backup
+
+  if (supabase) {
+    try {
+      const { error } = await supabase
+        .from('desa_benjor_db')
+        .update({ data: newData })
+        .eq('id', 1);
+
+      if (error) {
+        // Table row missing, try upserting
+        console.warn('Upserting state to Supabase...');
+        await supabase.from('desa_benjor_db').upsert({ id: 1, data: newData });
+      }
+    } catch (err) {
+      console.error('Error saving data to Supabase:', err.message);
+    }
   }
 };
 
@@ -71,7 +139,7 @@ if (isCloudinaryConfigured()) {
   console.log('⚠️ Cloudinary not configured. Uploads will fallback to local folder: /backend/uploads/');
 }
 
-// Multer configuration (Memory storage for Cloudinary, Disk storage for local fallback)
+// Multer configuration for uploads
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
@@ -82,7 +150,6 @@ app.post('/api/auth/login', (req, res) => {
   const envPass = process.env.ADMIN_PASSWORD || 'admin';
 
   if (username === envUser && password === envPass) {
-    // Generate a simple token
     const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
     return res.json({ token, username });
   }
@@ -93,7 +160,7 @@ app.post('/api/auth/login', (req, res) => {
 const validateAdmin = (req) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) return false;
-  return true; // Simple check for bearer token presence
+  return true;
 };
 
 // --- FILE UPLOAD TO CLOUDINARY OR LOCAL FALLBACK ---
@@ -104,7 +171,6 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 
   try {
     if (isCloudinaryConfigured()) {
-      // Upload to Cloudinary using upload_stream
       const uploadStream = () => {
         return new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
@@ -122,7 +188,6 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
       console.log('File successfully uploaded to Cloudinary:', result.secure_url);
       return res.json({ url: result.secure_url });
     } else {
-      // Local fallback
       const ext = path.extname(req.file.originalname);
       const filename = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}${ext}`;
       const filePath = path.join(uploadsDir, filename);
@@ -139,161 +204,161 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 });
 
 // --- VILLAGE INFO API ---
-app.get('/api/village-info', (req, res) => {
-  const db = readDb();
+app.get('/api/village-info', async (req, res) => {
+  const db = await fetchDb();
   res.json(db.villageInfo);
 });
 
-app.put('/api/village-info', (req, res) => {
+app.put('/api/village-info', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = readDb();
+  const db = await fetchDb();
   db.villageInfo = { ...db.villageInfo, ...req.body };
-  writeDb(db);
+  await saveDb(db);
   res.json(db.villageInfo);
 });
 
 // --- SLIDER IMAGES API ---
-app.get('/api/slider', (req, res) => {
-  const db = readDb();
+app.get('/api/slider', async (req, res) => {
+  const db = await fetchDb();
   res.json(db.sliderImages);
 });
 
-app.post('/api/slider', (req, res) => {
+app.post('/api/slider', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = readDb();
+  const db = await fetchDb();
   const newSlide = { id: String(Date.now()), ...req.body };
   db.sliderImages.push(newSlide);
-  writeDb(db);
+  await saveDb(db);
   res.json(newSlide);
 });
 
-app.delete('/api/slider/:id', (req, res) => {
+app.delete('/api/slider/:id', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = readDb();
+  const db = await fetchDb();
   db.sliderImages = db.sliderImages.filter(s => s.id !== req.params.id);
-  writeDb(db);
+  await saveDb(db);
   res.json({ message: 'Slide deleted' });
 });
 
 // --- BERITA CRUD API ---
-app.get('/api/berita', (req, res) => {
-  const db = readDb();
+app.get('/api/berita', async (req, res) => {
+  const db = await fetchDb();
   res.json(db.berita);
 });
 
-app.post('/api/berita', (req, res) => {
+app.post('/api/berita', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = readDb();
+  const db = await fetchDb();
   const newBerita = { id: String(Date.now()), ...req.body };
   db.berita.unshift(newBerita);
-  writeDb(db);
+  await saveDb(db);
   res.json(newBerita);
 });
 
-app.put('/api/berita/:id', (req, res) => {
+app.put('/api/berita/:id', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = readDb();
+  const db = await fetchDb();
   db.berita = db.berita.map(item => item.id === req.params.id ? { ...item, ...req.body } : item);
-  writeDb(db);
+  await saveDb(db);
   res.json({ message: 'Berita updated' });
 });
 
-app.delete('/api/berita/:id', (req, res) => {
+app.delete('/api/berita/:id', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = readDb();
+  const db = await fetchDb();
   db.berita = db.berita.filter(item => item.id !== req.params.id);
-  writeDb(db);
+  await saveDb(db);
   res.json({ message: 'Berita deleted' });
 });
 
 // --- UMKM CRUD API ---
-app.get('/api/umkm', (req, res) => {
-  const db = readDb();
+app.get('/api/umkm', async (req, res) => {
+  const db = await fetchDb();
   res.json(db.umkm);
 });
 
-app.post('/api/umkm', (req, res) => {
+app.post('/api/umkm', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = readDb();
+  const db = await fetchDb();
   const newProduct = { id: String(Date.now()), ...req.body };
   db.umkm.unshift(newProduct);
-  writeDb(db);
+  await saveDb(db);
   res.json(newProduct);
 });
 
-app.put('/api/umkm/:id', (req, res) => {
+app.put('/api/umkm/:id', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = readDb();
+  const db = await fetchDb();
   db.umkm = db.umkm.map(item => item.id === req.params.id ? { ...item, ...req.body } : item);
-  writeDb(db);
+  await saveDb(db);
   res.json({ message: 'Product updated' });
 });
 
-app.delete('/api/umkm/:id', (req, res) => {
+app.delete('/api/umkm/:id', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = readDb();
+  const db = await fetchDb();
   db.umkm = db.umkm.filter(item => item.id !== req.params.id);
-  writeDb(db);
+  await saveDb(db);
   res.json({ message: 'Product deleted' });
 });
 
 // --- SOTK CRUD API ---
-app.get('/api/sotk', (req, res) => {
-  const db = readDb();
+app.get('/api/sotk', async (req, res) => {
+  const db = await fetchDb();
   res.json(db.sotk);
 });
 
-app.post('/api/sotk', (req, res) => {
+app.post('/api/sotk', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = readDb();
+  const db = await fetchDb();
   const newMember = { id: String(Date.now()), ...req.body };
   db.sotk.push(newMember);
-  writeDb(db);
+  await saveDb(db);
   res.json(newMember);
 });
 
-app.put('/api/sotk/:id', (req, res) => {
+app.put('/api/sotk/:id', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = readDb();
+  const db = await fetchDb();
   db.sotk = db.sotk.map(member => member.id === req.params.id ? { ...member, ...req.body } : member);
-  writeDb(db);
+  await saveDb(db);
   res.json({ message: 'SOTK member updated' });
 });
 
-app.delete('/api/sotk/:id', (req, res) => {
+app.delete('/api/sotk/:id', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = readDb();
+  const db = await fetchDb();
   db.sotk = db.sotk.filter(member => member.id !== req.params.id);
-  writeDb(db);
+  await saveDb(db);
   res.json({ message: 'SOTK member deleted' });
 });
 
 // --- INFOGRAFIS API ---
-app.get('/api/infografis', (req, res) => {
-  const db = readDb();
+app.get('/api/infografis', async (req, res) => {
+  const db = await fetchDb();
   res.json(db.infografis);
 });
 
-app.put('/api/infografis', (req, res) => {
+app.put('/api/infografis', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = readDb();
+  const db = await fetchDb();
   db.infografis = { ...db.infografis, ...req.body };
-  writeDb(db);
+  await saveDb(db);
   res.json(db.infografis);
 });
 
 // --- WISATA & KOMENTAR API ---
-app.get('/api/wisata', (req, res) => {
-  const db = readDb();
+app.get('/api/wisata', async (req, res) => {
+  const db = await fetchDb();
   res.json(db.wisata || []);
 });
 
-app.post('/api/wisata/:id/comments', (req, res) => {
+app.post('/api/wisata/:id/comments', async (req, res) => {
   const { name, text } = req.body;
   if (!name || !text) {
     return res.status(400).json({ message: 'Nama dan komentar tidak boleh kosong!' });
   }
-  const db = readDb();
+  const db = await fetchDb();
   const wisataItem = db.wisata?.find(w => w.id === req.params.id);
   if (!wisataItem) {
     return res.status(404).json({ message: 'Objek wisata tidak ditemukan!' });
@@ -306,20 +371,20 @@ app.post('/api/wisata/:id/comments', (req, res) => {
   };
   if (!wisataItem.comments) wisataItem.comments = [];
   wisataItem.comments.push(newComment);
-  writeDb(db);
+  await saveDb(db);
   res.json(newComment);
 });
 
-app.delete('/api/wisata/:id/comments/:commentId', (req, res) => {
+app.delete('/api/wisata/:id/comments/:commentId', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = readDb();
+  const db = await fetchDb();
   const wisataItem = db.wisata?.find(w => w.id === req.params.id);
   if (!wisataItem) {
     return res.status(404).json({ message: 'Objek wisata tidak ditemukan!' });
   }
   if (!wisataItem.comments) wisataItem.comments = [];
   wisataItem.comments = wisataItem.comments.filter(c => c.id !== req.params.commentId);
-  writeDb(db);
+  await saveDb(db);
   res.json({ message: 'Komentar berhasil dihapus' });
 });
 

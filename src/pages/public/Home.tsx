@@ -278,15 +278,15 @@ const Home = () => {
         style={{ backgroundImage: `url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80')` }}
       >
         {/* Soft background overlay for text readability */}
-        <div className="absolute inset-0 bg-white/90 dark:bg-gray-950/92 z-0 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-white/45 dark:bg-gray-950/55 z-0" />
         
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-[#2D5A27] dark:text-green-400 font-bold text-sm tracking-wider uppercase bg-green-50/50 dark:bg-green-950/30 px-3 py-1.5 rounded-lg border border-green-100/30">Statistik Kependudukan</span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mt-4 mb-4 tracking-tight">
+            <span className="text-[#2D5A27] dark:text-green-400 font-bold text-sm tracking-wider uppercase bg-white/80 dark:bg-gray-900/80 px-3 py-1.5 rounded-lg border border-green-100/30 dark:border-gray-800 shadow-sm backdrop-blur-sm">Statistik Kependudukan</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mt-4 mb-4 tracking-tight drop-shadow-sm">
               Administrasi Penduduk
             </h2>
-            <p className="text-gray-600 dark:text-gray-300 text-base leading-relaxed">
+            <p className="text-gray-800 dark:text-gray-200 text-base leading-relaxed font-semibold bg-white/70 dark:bg-gray-900/70 px-6 py-3 rounded-2xl backdrop-blur-sm border border-white/20 dark:border-gray-800/40 shadow-sm">
               Sistem pengelolaan data kependudukan digital untuk memberikan pelayanan publik yang efektif, efisien, dan transparan bagi seluruh warga Desa Benjor.
             </p>
           </div>
@@ -467,16 +467,16 @@ const Home = () => {
         style={{ backgroundImage: `url('https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=1920&q=80')` }}
       >
         {/* Soft background overlay */}
-        <div className="absolute inset-0 bg-white/92 dark:bg-gray-950/93 z-0 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-white/45 dark:bg-gray-950/55 z-0" />
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-16">
-            <div className="text-center md:text-left mb-6 md:mb-0">
-              <span className="text-[#2D5A27] dark:text-green-400 font-bold text-sm tracking-wider uppercase bg-green-50/50 dark:bg-green-950/30 px-3 py-1.5 rounded-lg border border-green-100/30">Pesona Wisata</span>
-              <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mt-4 mb-4 tracking-tight">
+            <div className="text-center md:text-left mb-6 md:mb-0 max-w-2xl bg-white/75 dark:bg-gray-900/75 p-6 rounded-2xl backdrop-blur-sm border border-white/20 dark:border-gray-800/40 shadow-sm">
+              <span className="text-[#2D5A27] dark:text-green-400 font-bold text-sm tracking-wider uppercase bg-white/80 dark:bg-gray-900/80 px-3 py-1.5 rounded-lg border border-green-100/30 dark:border-gray-800 shadow-sm inline-block mb-3">Pesona Wisata</span>
+              <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mt-2 mb-4 tracking-tight drop-shadow-sm">
                 Wisata Desa Benjor
               </h2>
-              <p className="text-gray-600 dark:text-gray-300 text-base">
+              <p className="text-gray-700 dark:text-gray-200 text-base leading-relaxed font-semibold">
                 Menampilkan keindahan alam, destinasi wisata unggulan, dan keasrian lingkungan di Desa Benjor.
               </p>
             </div>

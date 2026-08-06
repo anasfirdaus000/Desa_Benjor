@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { Save, Image as ImageIcon } from 'lucide-react';
 
@@ -6,10 +6,21 @@ const KelolaSambutan = () => {
   const { villageInfo, setVillageInfo } = useAppContext();
   
   const [formData, setFormData] = useState({
-    headName: villageInfo.headName,
-    headImage: villageInfo.headImage,
-    welcomeMessage: villageInfo.welcomeMessage,
+    headName: villageInfo.headName || '',
+    headImage: villageInfo.headImage || '',
+    welcomeMessage: villageInfo.welcomeMessage || '',
   });
+
+  // Keep state in sync with context when it fetches asynchronously
+  useEffect(() => {
+    if (villageInfo) {
+      setFormData({
+        headName: villageInfo.headName || '',
+        headImage: villageInfo.headImage || '',
+        welcomeMessage: villageInfo.welcomeMessage || '',
+      });
+    }
+  }, [villageInfo]);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +102,7 @@ const KelolaSambutan = () => {
         <div className="pt-4 border-t flex justify-end">
           <button 
             type="submit"
-            className="bg-[#2D5A27] hover:bg-green-700 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 transition-colors font-medium"
+            className="bg-[#2D5A27] hover:bg-green-700 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 transition-colors font-medium cursor-pointer"
           >
             <Save size={18} /> Simpan Perubahan
           </button>

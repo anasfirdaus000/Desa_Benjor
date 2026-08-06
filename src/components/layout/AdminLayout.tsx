@@ -21,6 +21,14 @@ const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const { adminProfile } = useAppContext();
 
+  // Login checking to prevent unauthorized access
+  React.useEffect(() => {
+    const token = localStorage.getItem('admin_token');
+    if (!token) {
+      navigate('/login');
+    }
+  }, [navigate]);
+
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
     { icon: ImageIcon, label: 'Kelola Media', path: '/admin/media' },
@@ -34,7 +42,7 @@ const AdminLayout = () => {
   ];
 
   const handleLogout = () => {
-    // In a real app, clear auth token here
+    localStorage.removeItem('admin_token');
     navigate('/login');
   };
 
@@ -67,7 +75,7 @@ const AdminLayout = () => {
         <div className="absolute bottom-0 w-full p-4 border-t border-green-700">
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-green-100 hover:bg-red-600 hover:text-white transition-colors"
+            className="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-green-100 hover:bg-red-600 hover:text-white transition-colors cursor-pointer"
           >
             <LogOut size={20} />
             <span>Logout</span>
@@ -81,7 +89,7 @@ const AdminLayout = () => {
         <header className="bg-white shadow-sm h-16 flex items-center justify-between px-4 z-10">
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-md hover:bg-gray-100 text-gray-600"
+            className="p-2 rounded-md hover:bg-gray-100 text-gray-600 cursor-pointer"
           >
             <Menu size={24} />
           </button>
