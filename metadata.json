@@ -1,0 +1,8 @@
+{
+  "name": "Sistem Informasi Desa Benjor",
+  "description": "Website profil dan pelayanan informasi publik untuk Desa Benjor, Kecamatan Tumpang, Kabupaten Malang.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
