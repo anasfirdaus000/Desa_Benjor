@@ -82,8 +82,18 @@ if (supabase) {
   console.log('⚠️ Supabase not configured. Using local fallback database: /backend/db.json');
 }
 
-// Local read backup
+// Local read backup (falls back to /tmp/db.json if writable backup exists, e.g. on Vercel)
 const readLocalDb = () => {
+  try {
+    const tmpPath = path.join('/tmp', 'db.json');
+    if (fs.existsSync(tmpPath)) {
+      const data = fs.readFileSync(tmpPath, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (e) {
+    console.warn('Could not read from /tmp/db.json, trying packaged file...', e.message);
+  }
+
   try {
     const data = fs.readFileSync(dbPath, 'utf8');
     return JSON.parse(data);
@@ -93,12 +103,18 @@ const readLocalDb = () => {
   }
 };
 
-// Local write backup
+// Local write backup (safely handles read-only filesystems by trying /tmp as backup)
 const writeLocalDb = (data) => {
   try {
     fs.writeFileSync(dbPath, JSON.stringify(data, null, 2), 'utf8');
   } catch (error) {
-    console.error('Error writing local db.json:', error);
+    console.warn('Error writing packaged db.json (read-only filesystem), saving to /tmp/db.json...', error.message);
+    try {
+      const tmpPath = path.join('/tmp', 'db.json');
+      fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2), 'utf8');
+    } catch (tmpError) {
+      console.error('Failed to write backup to /tmp/db.json:', tmpError.message);
+    }
   }
 };
 
