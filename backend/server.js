@@ -16,6 +16,31 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Automatic async route error catching patch
+const patchMethod = (method) => {
+  const original = app[method].bind(app);
+  app[method] = (path, ...callbacks) => {
+    const wrapped = callbacks.map(cb => {
+      if (typeof cb !== 'function') return cb;
+      return (req, res, next) => {
+        try {
+          const result = cb(req, res, next);
+          if (result && typeof result.catch === 'function') {
+            result.catch(next);
+          }
+        } catch (err) {
+          next(err);
+        }
+      };
+    });
+    return original(path, ...wrapped);
+  };
+};
+patchMethod('get');
+patchMethod('post');
+patchMethod('put');
+patchMethod('delete');
+
 app.use(cors());
 app.use(express.json());
 
@@ -94,7 +119,10 @@ const fetchDb = async () => {
       // If table is empty or row does not exist, initialize it
       console.log('Supabase table empty or row not found. Initializing with default local data...');
       const localData = readLocalDb();
-      await supabase.from('desa_benjor_db').upsert({ id: 1, data: localData });
+      const { error: initError } = await supabase.from('desa_benjor_db').upsert({ id: 1, data: localData });
+      if (initError) {
+        console.warn('Initial Supabase seed failed, RLS might be active:', initError.message);
+      }
       return localData;
     } catch (err) {
       console.warn('Supabase query failed, falling back to local db.json:', err.message);
@@ -109,19 +137,21 @@ const saveDb = async (newData) => {
   writeLocalDb(newData); // Always update local backup
 
   if (supabase) {
-    try {
-      const { error } = await supabase
-        .from('desa_benjor_db')
-        .update({ data: newData })
-        .eq('id', 1);
+    const { error: updateError } = await supabase
+      .from('desa_benjor_db')
+      .update({ data: newData })
+      .eq('id', 1);
 
-      if (error) {
-        // Table row missing, try upserting
-        console.warn('Upserting state to Supabase...');
-        await supabase.from('desa_benjor_db').upsert({ id: 1, data: newData });
+    if (updateError) {
+      console.warn('Supabase update failed, trying upsert...', updateError.message);
+      const { error: upsertError } = await supabase
+        .from('desa_benjor_db')
+        .upsert({ id: 1, data: newData });
+
+      if (upsertError) {
+        console.error('Supabase upsert failed too:', upsertError.message);
+        throw new Error(`Database Supabase Error: ${upsertError.message}`);
       }
-    } catch (err) {
-      console.error('Error saving data to Supabase:', err.message);
     }
   }
 };
@@ -396,6 +426,12 @@ app.delete('/api/wisata/:id/comments/:commentId', async (req, res) => {
   wisataItem.comments = wisataItem.comments.filter(c => c.id !== req.params.commentId);
   await saveDb(db);
   res.json({ message: 'Komentar berhasil dihapus' });
+});
+
+// --- CENTRAL ERROR-HANDLING MIDDLEWARE ---
+app.use((err, req, res, next) => {
+  console.error('API Server Error:', err);
+  res.status(500).json({ message: err.message || 'Terjadi kesalahan internal pada server' });
 });
 
 if (!process.env.VERCEL) {

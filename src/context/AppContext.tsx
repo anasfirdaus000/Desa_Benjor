@@ -250,9 +250,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         headers,
         body: body ? JSON.stringify(body) : undefined
       });
+      
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        const errMsg = errData.message || res.statusText || 'Gagal menyimpan perubahan';
+        console.error(`Sync failed for ${url}:`, errMsg);
+        alert(`Peringatan: Gagal menyimpan data ke database server.\nDetail: ${errMsg}\n\nPeriksa konfigurasi Row Level Security (RLS) di Supabase Anda.`);
+      }
       return res.ok;
     } catch (e) {
       console.error(`Error syncing with ${url}:`, e);
+      alert('Peringatan: Koneksi internet terputus atau server offline. Perubahan tidak tersimpan ke database cloud.');
       return false;
     }
   };

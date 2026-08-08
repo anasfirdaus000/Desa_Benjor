@@ -12,6 +12,7 @@ const Home = () => {
   const [commentName, setCommentName] = useState('');
   const [commentText, setCommentText] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [activeCard, setActiveCard] = useState(0);
 
   const sliderRef = useRef<HTMLDivElement>(null);
   const isAdmin = !!localStorage.getItem('admin_token');
@@ -274,8 +275,9 @@ const Home = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-6">Kepala Desa Benjor, Kecamatan Tumpang</p>
             <div className="relative">
               <span className="absolute -top-6 -left-4 text-7xl text-green-150/40 dark:text-green-900/40 font-serif pointer-events-none">“</span>
-              <p className="text-gray-600 dark:text-gray-300 leading-relaxed italic text-lg relative z-10 pl-2">
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed italic text-lg relative z-10 pl-2 pr-6">
                 {villageInfo.welcomeMessage}
+                <span className="text-xl font-serif text-[#2D5A27] dark:text-green-400 font-bold ml-1">”</span>
               </p>
             </div>
           </div>
@@ -326,9 +328,7 @@ const Home = () => {
             ))}
           </div>
         </div>
-      </section>
-
-      {/* Produk Unggulan Section - Unlocked horizontal scroll with fanned visual look on desktop */}
+      </section>      {/* Produk Unggulan Section - Unlocked horizontal scroll with fanned visual look on desktop */}
       <section className="py-24 px-4 bg-gray-50/50 dark:bg-gray-950/60 relative overflow-hidden border-b border-gray-100 dark:border-gray-850">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -343,40 +343,66 @@ const Home = () => {
             </p>
           </div>
 
-          {/* Cards Slider Wrapper */}
-          <div className="relative group w-full px-4 md:px-10">
-            {/* Navigation buttons */}
-            <button 
-              onClick={slideLeft} 
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-            >
-              <ChevronLeft size={22} />
-            </button>
-            <button 
-              onClick={slideRight} 
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-            >
-              <ChevronRight size={22} />
-            </button>
-
-            {/* Slider cards row - desktop gets fanned out tilted rotation cards, hovering straightens them! */}
-            <div 
-              ref={sliderRef}
-              className="flex gap-8 overflow-x-auto scroll-smooth snap-x snap-mandatory py-8 px-4 hide-scrollbar"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
+          {/* Desktop version: Fanned Card Deck Carousel */}
+          <div className="hidden md:flex flex-col items-center justify-center relative w-full h-[580px] overflow-hidden px-4">
+            {/* Cards stack */}
+            <div className="relative w-[320px] h-[480px]">
               {umkm.map((product, idx) => {
-                // Calculate rotation dynamically to create the fanned card deck appearance on desktop
-                // Card 0: -3deg, Card 1: 0deg, Card 2: 3deg, Card 3: -2deg, etc.
-                const rotations = ['rotate-[-3deg] translate-y-1.5', 'rotate-[0deg]', 'rotate-[3deg] translate-y-1.5', 'rotate-[-2deg]', 'rotate-[2deg]'];
-                const cardRotationClass = rotations[idx % rotations.length];
+                const diff = idx - activeCard;
+                const isActive = diff === 0;
+                const isNext = diff === 1;
+                const isFarNext = diff === 2;
+                const isFarFarNext = diff > 2;
+                const isPrev = diff === -1;
+                const isFarPrev = diff < -1;
+
+                let transform = "";
+                let opacity = 0;
+                let zIndex = 0;
+                let pointerEvents: "auto" | "none" = "auto";
+
+                if (isActive) {
+                  transform = "translateX(0) translateY(0) rotate(0deg) scale(1.02)";
+                  opacity = 1;
+                  zIndex = 30;
+                } else if (isNext) {
+                  transform = "translateX(220px) translateY(20px) rotate(5deg) scale(0.95)";
+                  opacity = 0.75;
+                  zIndex = 20;
+                } else if (isFarNext) {
+                  transform = "translateX(440px) translateY(40px) rotate(10deg) scale(0.9)";
+                  opacity = 0.45;
+                  zIndex = 10;
+                } else if (isFarFarNext) {
+                  transform = "translateX(660px) translateY(60px) rotate(15deg) scale(0.85)";
+                  opacity = 0;
+                  zIndex = 5;
+                  pointerEvents = "none";
+                } else if (isPrev) {
+                  transform = "translateX(-350px) translateY(30px) rotate(-10deg) scale(0.95)";
+                  opacity = 0;
+                  zIndex = 10;
+                  pointerEvents = "none";
+                } else if (isFarPrev) {
+                  transform = "translateX(-600px) translateY(40px) rotate(-15deg) scale(0.9)";
+                  opacity = 0;
+                  zIndex = 5;
+                  pointerEvents = "none";
+                }
 
                 return (
-                  <div 
+                  <div
                     key={product.id}
-                    className={`w-[280px] sm:w-[320px] bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-md dark:shadow-2xl border border-gray-100 dark:border-gray-800/85 flex flex-col justify-between flex-shrink-0 snap-center md:${cardRotationClass} hover:rotate-0 hover:-translate-y-2 transition-all duration-300`}
+                    style={{
+                      transform,
+                      opacity,
+                      zIndex,
+                      pointerEvents,
+                      transition: "all 0.6s cubic-bezier(0.25, 1, 0.5, 1)"
+                    }}
+                    className="absolute inset-0 bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800 flex flex-col justify-between"
                   >
-                    <Link to={`/umkm/${product.id}`} className="relative h-44 sm:h-52 overflow-hidden bg-gray-100 dark:bg-gray-800 block flex-shrink-0">
+                    <Link to={`/umkm/${product.id}`} className="relative h-56 overflow-hidden bg-gray-100 dark:bg-gray-800 block flex-shrink-0">
                       <img 
                         src={product.image} 
                         alt={product.name} 
@@ -386,23 +412,23 @@ const Home = () => {
                         {product.category}
                       </div>
                     </Link>
-                    <div className="p-4 sm:p-5 flex-grow flex flex-col justify-between overflow-hidden">
+                    <div className="p-5 flex-grow flex flex-col justify-between overflow-hidden">
                       <div className="overflow-hidden">
                         <Link to={`/umkm/${product.id}`} className="block hover:text-[#2D5A27] dark:hover:text-green-400 transition-colors">
-                          <h3 className="font-extrabold text-sm sm:text-base text-gray-900 dark:text-white mb-1 leading-snug line-clamp-1">{product.name}</h3>
+                          <h3 className="font-extrabold text-base text-gray-900 dark:text-white mb-1 leading-snug line-clamp-1">{product.name}</h3>
                         </Link>
-                        <p className="text-[#2D5A27] dark:text-green-400 font-black text-base sm:text-lg mb-2">
+                        <p className="text-[#2D5A27] dark:text-green-400 font-black text-lg mb-2">
                           Rp {product.price.toLocaleString('id-ID')}
                         </p>
-                        <p className="text-gray-505 dark:text-gray-400 text-xxs sm:text-xs line-clamp-3 leading-relaxed mb-4">{product.description}</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-xs line-clamp-3 leading-relaxed mb-4">{product.description}</p>
                       </div>
                       
                       <div className="flex-shrink-0">
-                        <div className="flex items-center gap-1.5 text-xxs text-gray-400 dark:text-gray-500 mb-3 pb-2 border-b border-gray-100 dark:border-gray-800">
+                        <div className="flex items-center gap-1.5 text-xxs text-gray-400 dark:text-gray-550 mb-3 pb-2 border-b border-gray-100 dark:border-gray-800">
                           <span>Pemilik: <strong className="text-gray-600 dark:text-gray-300 font-semibold">{product.owner}</strong></span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                        <div className="grid grid-cols-2 gap-3">
                           <Link 
                             to={`/umkm/${product.id}`}
                             className="flex items-center justify-center gap-1 border border-gray-200 dark:border-gray-700 hover:border-[#2D5A27] dark:hover:border-green-500 text-gray-700 dark:text-gray-300 hover:text-[#2D5A27] dark:hover:text-green-400 font-bold py-2 px-3 rounded-xl transition-colors text-xxs"
@@ -423,6 +449,91 @@ const Home = () => {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Slider navigation controls */}
+            <div className="flex gap-4 mt-8 z-20">
+              <button 
+                onClick={() => setActiveCard(prev => Math.max(0, prev - 1))}
+                disabled={activeCard === 0}
+                className="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-md hover:bg-gray-55 dark:hover:bg-gray-700 transition-colors disabled:opacity-40 cursor-pointer"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button 
+                onClick={() => setActiveCard(prev => Math.min(umkm.length - 1, prev + 1))}
+                disabled={activeCard === umkm.length - 1}
+                className="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-md hover:bg-gray-55 dark:hover:bg-gray-700 transition-colors disabled:opacity-40 cursor-pointer"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+
+            {/* Progress indicators */}
+            <div className="flex gap-2 mt-4 z-20">
+              {umkm.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveCard(idx)}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    idx === activeCard ? 'bg-[#2D5A27] w-6' : 'bg-gray-300 dark:bg-gray-700'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile version: simple side scrolling snap-carousel */}
+          <div className="md:hidden relative group w-full px-4">
+            <div 
+              ref={sliderRef}
+              className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory py-4 hide-scrollbar"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {umkm.map((product) => (
+                <div 
+                  key={product.id}
+                  className="w-[280px] bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-md border border-gray-100 dark:border-gray-800 flex flex-col justify-between flex-shrink-0 snap-center"
+                >
+                  <Link to={`/umkm/${product.id}`} className="relative h-44 overflow-hidden bg-gray-100 dark:bg-gray-800 block">
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-2 right-2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-bold text-[#2D5A27] dark:text-green-450 shadow-sm border dark:border-gray-800">
+                      {product.category}
+                    </div>
+                  </Link>
+                  <div className="p-4 flex-grow flex flex-col justify-between">
+                    <div>
+                      <Link to={`/umkm/${product.id}`} className="block hover:text-[#2D5A27] dark:hover:text-green-400 transition-colors">
+                        <h3 className="font-extrabold text-sm text-gray-900 dark:text-white mb-1 line-clamp-1">{product.name}</h3>
+                      </Link>
+                      <p className="text-[#2D5A27] dark:text-green-400 font-bold text-base mb-1">
+                        Rp {product.price.toLocaleString('id-ID')}
+                      </p>
+                      <p className="text-gray-500 dark:text-gray-400 text-xxs line-clamp-2 mb-3">{product.description}</p>
+                    </div>
+                    <div>
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        <Link 
+                          to={`/umkm/${product.id}`}
+                          className="flex items-center justify-center gap-1 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold py-1.5 px-2 rounded-lg text-xxs"
+                        >
+                          Detail
+                        </Link>
+                        <button 
+                          onClick={() => handleBuyWA(product.wa, product.name)}
+                          className="flex items-center justify-center gap-1 bg-[#25D366] text-white font-bold py-1.5 px-2 rounded-lg text-xxs"
+                        >
+                          Beli via WA
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
