@@ -47,7 +47,9 @@ const Dashboard = () => {
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Pengunjung</p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">1,204</p>
+            <p className="text-3xl font-bold text-gray-900 dark:text-white">
+              {Number(villageInfo.stats?.visitors || 1204).toLocaleString('id-ID')}
+            </p>
           </div>
         </div>
       </div>

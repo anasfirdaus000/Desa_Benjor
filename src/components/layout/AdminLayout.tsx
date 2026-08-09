@@ -15,7 +15,8 @@ import {
   MessageSquare,
   Globe,
   Sun,
-  Moon
+  Moon,
+  Compass
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -64,6 +65,7 @@ const AdminLayout = () => {
     { icon: Users, label: 'Kelola SOTK', path: '/admin/sotk' },
     { icon: Store, label: 'Kelola UMKM', path: '/admin/umkm' },
     { icon: Newspaper, label: 'Kelola Berita', path: '/admin/berita' },
+    { icon: Compass, label: 'Kelola Wisata', path: '/admin/wisata' },
     { icon: BarChart3, label: 'Infografis', path: '/admin/infografis' },
     { icon: Settings, label: 'Pengaturan Umum', path: '/admin/pengaturan' },
     { icon: UserCircle, label: 'Keamanan Akun', path: '/admin/akun' },

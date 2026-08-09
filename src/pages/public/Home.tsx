@@ -140,7 +140,7 @@ const Home = () => {
     {
       id: 'kk',
       label: 'Kepala Keluarga',
-      value: '435',
+      value: (villageInfo.stats?.kk || '435').toLocaleString(),
       unit: 'KK',
       icon: '/tamang_files/kepala-keluarga-BcdRTpvQ.png',
       color: 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400'
@@ -148,7 +148,7 @@ const Home = () => {
     {
       id: 'sementara',
       label: 'Penduduk Sementara',
-      value: '12',
+      value: (villageInfo.stats?.sementara || '12').toLocaleString(),
       unit: 'Jiwa',
       icon: '/tamang_files/penduduk-sementara-P644cOda.png',
       color: 'bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400'
@@ -156,10 +156,10 @@ const Home = () => {
     {
       id: 'mutasi',
       label: 'Mutasi Penduduk',
-      value: '5',
+      value: (villageInfo.stats?.mutasi || '5').toLocaleString(),
       unit: 'Jiwa',
       icon: '/tamang_files/mutasi-penduduk-_1rO7gmp.png',
-      color: 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400'
+      color: 'bg-red-55 dark:bg-red-950/40 text-red-600 dark:text-red-400'
     }
   ];
 
@@ -210,10 +210,10 @@ const Home = () => {
                 Sistem Informasi Digital
               </span>
               <h1 className="text-3xl md:text-6xl font-black text-white mb-5 md:mb-6 drop-shadow-md leading-tight tracking-tight max-w-5xl">
-                Selamat Datang di <br className="hidden md:block"/>Website Resmi Desa Benjor
+                {villageInfo.heroTitle || 'Selamat Datang di Website Resmi Desa Benjor'}
               </h1>
               <p className="text-sm md:text-xl text-gray-200/90 max-w-3xl drop-shadow-md mb-8 font-light leading-relaxed">
-                Mewujudkan tata kelola pemerintahan desa yang mandiri, transparan, sejahtera, dan berbudaya berlandaskan gotong royong.
+                {villageInfo.heroSubtitle || 'Mewujudkan tata kelola pemerintahan desa yang mandiri, transparan, sejahtera, dan berbudaya berlandaskan gotong royong.'}
               </p>
               <div className="flex gap-3 md:gap-4 flex-wrap">
                 <Link to="/profil" className="bg-[#2D5A27] hover:bg-green-700 text-white font-semibold px-5 py-2.5 md:px-6 md:py-3 rounded-lg text-sm md:text-base shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">

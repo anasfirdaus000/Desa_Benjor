@@ -22,6 +22,13 @@ const KelolaPengaturan = () => {
     statsArea: villageInfo.stats?.area || '',
     statsRt: villageInfo.stats?.rt || '',
     statsRw: villageInfo.stats?.rw || '',
+    heroTitle: villageInfo.heroTitle || '',
+    heroSubtitle: villageInfo.heroSubtitle || '',
+    footerDescription: villageInfo.footerDescription || '',
+    statsKk: villageInfo.stats?.kk || '',
+    statsSementara: villageInfo.stats?.sementara || '',
+    statsMutasi: villageInfo.stats?.mutasi || '',
+    statsVisitors: villageInfo.stats?.visitors || '',
   });
 
   // Keep state in sync with context when loaded asynchronously
@@ -44,6 +51,13 @@ const KelolaPengaturan = () => {
         statsArea: villageInfo.stats?.area || '',
         statsRt: villageInfo.stats?.rt || '',
         statsRw: villageInfo.stats?.rw || '',
+        heroTitle: villageInfo.heroTitle || '',
+        heroSubtitle: villageInfo.heroSubtitle || '',
+        footerDescription: villageInfo.footerDescription || '',
+        statsKk: villageInfo.stats?.kk || '',
+        statsSementara: villageInfo.stats?.sementara || '',
+        statsMutasi: villageInfo.stats?.mutasi || '',
+        statsVisitors: villageInfo.stats?.visitors || '',
       });
     }
   }, [villageInfo, adminProfile]);
@@ -57,6 +71,9 @@ const KelolaPengaturan = () => {
       mission: formData.mission,
       geography: formData.geography,
       mapEmbedUrl: formData.mapEmbedUrl,
+      heroTitle: formData.heroTitle,
+      heroSubtitle: formData.heroSubtitle,
+      footerDescription: formData.footerDescription,
       contact: {
         address: formData.contactAddress,
         email: formData.contactEmail,
@@ -70,7 +87,11 @@ const KelolaPengaturan = () => {
       stats: {
         area: formData.statsArea,
         rt: formData.statsRt,
-        rw: formData.statsRw
+        rw: formData.statsRw,
+        kk: formData.statsKk,
+        sementara: formData.statsSementara,
+        mutasi: formData.statsMutasi,
+        visitors: formData.statsVisitors,
       }
     });
     setAdminProfile({
@@ -112,6 +133,41 @@ const KelolaPengaturan = () => {
                 value={formData.adminEmail} 
                 onChange={(e) => setFormData({...formData, adminEmail: e.target.value})}
                 className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Hero Section & Footer */}
+        <div className="pt-6 border-t dark:border-gray-800">
+          <h3 className="text-lg font-bold text-gray-700 dark:text-white mb-4 border-l-4 border-[#2D5A27] pl-3">Hero Section & Footer</h3>
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Judul Hero (Selamat Datang...)</label>
+              <input 
+                type="text" 
+                value={formData.heroTitle} 
+                onChange={(e) => setFormData({...formData, heroTitle: e.target.value})}
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Subjudul Hero (Mewujudkan tata kelola...)</label>
+              <textarea 
+                value={formData.heroSubtitle} 
+                onChange={(e) => setFormData({...formData, heroSubtitle: e.target.value})}
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white h-20"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Deskripsi Ringkas Footer</label>
+              <textarea 
+                value={formData.footerDescription} 
+                onChange={(e) => setFormData({...formData, footerDescription: e.target.value})}
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white h-20"
                 required
               />
             </div>
@@ -231,7 +287,7 @@ const KelolaPengaturan = () => {
 
         {/* Peta & Statistik Fisik */}
         <div className="pt-6 border-t dark:border-gray-800">
-          <h3 className="text-lg font-bold text-gray-700 dark:text-white mb-4 border-l-4 border-[#2D5A27] pl-3">Geografis & Peta</h3>
+          <h3 className="text-lg font-bold text-gray-700 dark:text-white mb-4 border-l-4 border-[#2D5A27] pl-3">Geografis, Statistik & Peta</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">URL Google Maps Embed Frame</label>
@@ -277,6 +333,48 @@ const KelolaPengaturan = () => {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Demographics / Demografi */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Jumlah Kepala Keluarga (KK)</label>
+              <input 
+                type="text" 
+                value={formData.statsKk} 
+                onChange={(e) => setFormData({...formData, statsKk: e.target.value})}
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-855 dark:text-white"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Jumlah Penduduk Sementara</label>
+              <input 
+                type="text" 
+                value={formData.statsSementara} 
+                onChange={(e) => setFormData({...formData, statsSementara: e.target.value})}
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-855 dark:text-white"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Jumlah Mutasi Penduduk</label>
+              <input 
+                type="text" 
+                value={formData.statsMutasi} 
+                onChange={(e) => setFormData({...formData, statsMutasi: e.target.value})}
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-855 dark:text-white"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Pengunjung Website (Asli)</label>
+              <input 
+                type="text" 
+                value={formData.statsVisitors} 
+                onChange={(e) => setFormData({...formData, statsVisitors: e.target.value})}
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-855 dark:text-white"
+                required
+              />
             </div>
           </div>
         </div>

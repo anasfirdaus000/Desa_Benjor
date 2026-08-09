@@ -69,6 +69,9 @@ export interface VillageInfo {
   headName: string;
   headImage: string;
   welcomeMessage: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
+  footerDescription?: string;
   history: string;
   vision: string;
   mission: string;
@@ -88,6 +91,10 @@ export interface VillageInfo {
     area: string;
     rt: string;
     rw: string;
+    kk?: string;
+    sementara?: string;
+    mutasi?: string;
+    visitors?: string;
   };
 }
 
@@ -113,6 +120,7 @@ export interface AppState {
   setInfografis: React.Dispatch<React.SetStateAction<InfografisData>>;
   setVillageInfo: React.Dispatch<React.SetStateAction<VillageInfo>>;
   setAdminProfile: React.Dispatch<React.SetStateAction<AdminProfile>>;
+  setWisata: React.Dispatch<React.SetStateAction<Wisata[]>>;
 }
 
 const initialSliderImages = [
@@ -149,6 +157,9 @@ const initialVillageInfo: VillageInfo = {
   headName: 'IMAM MUNIR, SH',
   headImage: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400&h=400',
   welcomeMessage: 'Selamat datang di website resmi Desa Benjor. Kami berkomitmen untuk mewujudkan desa yang mandiri, sejahtera, dan religius melalui transparansi dan pelayanan prima.',
+  heroTitle: 'Selamat Datang di Website Resmi Desa Benjor',
+  heroSubtitle: 'Mewujudkan tata kelola pemerintahan desa yang mandiri, transparan, sejahtera, dan berbudaya berlandaskan gotong royong.',
+  footerDescription: 'Sistem Informasi Desa Benjor, Kecamatan Tumpang, Kabupaten Malang. Mewujudkan pelayanan desa digital yang efisien, transparan, dan terpercaya.',
   history: 'Desa Benjor memiliki sejarah panjang yang erat kaitannya dengan perjuangan masyarakat lokal...',
   vision: 'Mewujudkan Desa Benjor yang Mandiri, Sejahtera, dan Berbudaya Berlandaskan Gotong Royong.',
   mission: '1. Meningkatkan kualitas pelayanan publik.\n2. Mengembangkan potensi ekonomi kerakyatan melalui UMKM.\n3. Melestarikan budaya dan lingkungan hidup.',
@@ -167,7 +178,11 @@ const initialVillageInfo: VillageInfo = {
   stats: {
     area: '450 Ha',
     rt: '15',
-    rw: '4'
+    rw: '4',
+    kk: '435',
+    sementara: '12',
+    mutasi: '5',
+    visitors: '1204'
   }
 };
 
@@ -393,6 +408,33 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     });
   };
 
+  const handleSetWisata = async (value: React.SetStateAction<Wisata[]>) => {
+    setWisata((prev) => {
+      const nextList = typeof value === 'function' ? (value as Function)(prev) : value;
+      (async () => {
+        // Deletions
+        const deleted = prev.filter(p => !nextList.some(n => n.id === p.id));
+        for (const item of deleted) {
+          await syncWithBackend(getApiUrl(`/api/wisata/${item.id}`), 'DELETE', null);
+        }
+        // Additions
+        const added = nextList.filter(n => !prev.some(p => p.id === n.id));
+        for (const item of added) {
+          await syncWithBackend(getApiUrl('/api/wisata'), 'POST', item);
+        }
+        // Updates
+        const updated = nextList.filter(n => {
+          const old = prev.find(p => p.id === n.id);
+          return old && JSON.stringify(old) !== JSON.stringify(n);
+        });
+        for (const item of updated) {
+          await syncWithBackend(getApiUrl(`/api/wisata/${item.id}`), 'PUT', item);
+        }
+      })();
+      return nextList;
+    });
+  };
+
   return (
     <AppContext.Provider value={{
       sliderImages, sotk, umkm, berita, infografis, villageInfo, adminProfile, wisata,
@@ -403,7 +445,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setBerita: handleSetBerita,
       setInfografis: handleSetInfografis,
       setVillageInfo: handleSetVillageInfo,
-      setAdminProfile
+      setAdminProfile,
+      setWisata: handleSetWisata
     }}>
       {children}
     </AppContext.Provider>

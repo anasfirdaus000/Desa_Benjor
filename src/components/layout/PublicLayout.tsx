@@ -316,7 +316,7 @@ const PublicLayout = () => {
                 <h2 className="text-xl font-bold">Desa Benjor</h2>
               </div>
               <p className="text-gray-400 text-sm leading-relaxed">
-                Sistem Informasi Desa Benjor, Kecamatan Tumpang, Kabupaten Malang. Mewujudkan pelayanan desa digital yang efisien, transparan, dan terpercaya.
+                {villageInfo.footerDescription || 'Sistem Informasi Desa Benjor, Kecamatan Tumpang, Kabupaten Malang. Mewujudkan pelayanan desa digital yang efisien, transparan, dan terpercaya.'}
               </p>
             </div>
             <div>

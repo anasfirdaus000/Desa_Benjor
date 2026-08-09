@@ -27,6 +27,7 @@ import AdminInfografis from './pages/admin/KelolaInfografis';
 import AdminPengaturan from './pages/admin/KelolaPengaturan';
 import AdminAkun from './pages/admin/KelolaAkun';
 import AdminSambutan from './pages/admin/KelolaSambutan';
+import AdminWisata from './pages/admin/KelolaWisata';
 
 export default function App() {
   return (
@@ -59,6 +60,7 @@ export default function App() {
             <Route path="pengaturan" element={<AdminPengaturan />} />
             <Route path="akun" element={<AdminAkun />} />
             <Route path="sambutan" element={<AdminSambutan />} />
+            <Route path="wisata" element={<AdminWisata />} />
           </Route>
         </Routes>
       </BrowserRouter>
