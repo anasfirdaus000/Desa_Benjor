@@ -62,6 +62,38 @@ const KelolaPengaturan = () => {
     }
   }, [villageInfo, adminProfile]);
 
+  const handleResetVisitors = async () => {
+    if (!window.confirm('Yakin ingin meriset jumlah pengunjung website ke 0?')) return;
+    
+    try {
+      const token = localStorage.getItem('admin_token');
+      const API_BASE = import.meta.env.PROD ? '' : 'http://localhost:5000';
+      const res = await fetch(`${API_BASE}/api/village-info/reset-visitors`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (res.ok) {
+        setFormData(prev => ({ ...prev, statsVisitors: '0' }));
+        setVillageInfo(prev => ({
+          ...prev,
+          stats: {
+            ...prev.stats,
+            visitors: '0'
+          }
+        }));
+        alert('Jumlah pengunjung berhasil di-reset ke 0!');
+      } else {
+        alert('Gagal meriset jumlah pengunjung.');
+      }
+    } catch (e) {
+      alert('Gagal menyambungkan ke server.');
+    }
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     setVillageInfo({
@@ -371,12 +403,21 @@ const KelolaPengaturan = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-350">Pengunjung Website (Realtime)</label>
                 <span className="text-[10px] bg-green-100 dark:bg-green-950 text-[#2D5A27] dark:text-green-400 font-bold px-2 py-0.5 rounded-full border border-green-200/50">Otomatis</span>
               </div>
-              <input 
-                type="text" 
-                value={formData.statsVisitors} 
-                className="w-full p-2.5 border dark:border-gray-750 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 outline-none cursor-not-allowed"
-                readOnly
-              />
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={formData.statsVisitors} 
+                  className="flex-grow p-2.5 border dark:border-gray-750 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 outline-none cursor-not-allowed"
+                  readOnly
+                />
+                <button
+                  type="button"
+                  onClick={handleResetVisitors}
+                  className="bg-red-650 hover:bg-red-750 text-white font-bold px-4 py-2.5 rounded-lg text-xs transition-colors flex items-center justify-center cursor-pointer shadow-sm border border-red-700/10"
+                >
+                  Reset
+                </button>
+              </div>
             </div>
           </div>
         </div>

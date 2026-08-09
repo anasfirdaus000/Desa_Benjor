@@ -317,6 +317,18 @@ app.put('/api/village-info', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
+app.post('/api/village-info/reset-visitors', async (req, res) => {
+  if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
+  try {
+    const db = await fetchDb();
+    if (!db.villageInfo) db.villageInfo = {};
+    if (!db.villageInfo.stats) db.villageInfo.stats = {};
+    db.villageInfo.stats.visitors = '0';
+    await saveDb(db);
+    res.json({ message: 'Jumlah pengunjung berhasil di-reset ke 0!' });
+  } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
 // --- SLIDER IMAGES ---
 app.get('/api/slider', async (req, res) => {
   try { const db = await fetchDb(); res.json(db.sliderImages || []); }
