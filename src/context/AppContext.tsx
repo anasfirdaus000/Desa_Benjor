@@ -227,7 +227,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     const fetchBackendData = async () => {
       try {
-        const infoRes = await fetch(getApiUrl('/api/village-info'));
+        const isAdmin = window.location.pathname.startsWith('/admin');
+        const infoRes = await fetch(getApiUrl(isAdmin ? '/api/village-info' : '/api/village-info?increment=true'));
         if (infoRes.ok) setVillageInfo(await infoRes.json());
         
         const sliderRes = await fetch(getApiUrl('/api/slider'));

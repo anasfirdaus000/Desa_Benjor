@@ -205,15 +205,64 @@ const trySave = async (res, data, successBody) => {
 // ========================
 
 // --- AUTH ---
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body;
-  const envUser = process.env.ADMIN_USERNAME || 'admin';
-  const envPass = process.env.ADMIN_PASSWORD || 'admin';
-  if (username === envUser && password === envPass) {
-    const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
-    return res.json({ token, username });
+  try {
+    const db = await fetchDb();
+    const dbPassword = db.adminPassword || process.env.ADMIN_PASSWORD || 'admin';
+    const envUser = process.env.ADMIN_USERNAME || 'admin';
+    if (username === envUser && password === dbPassword) {
+      const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
+      return res.json({ token, username });
+    }
+    return res.status(401).json({ message: 'Username atau Password salah!' });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
   }
-  return res.status(401).json({ message: 'Username atau Password salah!' });
+});
+
+app.post('/api/auth/change-password', async (req, res) => {
+  if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
+  const { oldPassword, newPassword, securityQuestion, securityAnswer } = req.body;
+  try {
+    const db = await fetchDb();
+    const dbPassword = db.adminPassword || process.env.ADMIN_PASSWORD || 'admin';
+    if (oldPassword !== dbPassword) {
+      return res.status(400).json({ message: 'Password lama tidak cocok!' });
+    }
+    if (newPassword) db.adminPassword = newPassword;
+    if (securityQuestion) db.securityQuestion = securityQuestion;
+    if (securityAnswer) db.securityAnswer = securityAnswer;
+    await saveDb(db);
+    res.json({ message: 'Keamanan akun berhasil diperbarui!' });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+app.get('/api/auth/security-question', async (req, res) => {
+  try {
+    const db = await fetchDb();
+    res.json({ question: db.securityQuestion || 'Apa nama sekolah dasar Anda?' });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { answer, newPassword } = req.body;
+  try {
+    const db = await fetchDb();
+    const dbAnswer = (db.securityAnswer || 'benjor').trim().toLowerCase();
+    if (!answer || answer.trim().toLowerCase() !== dbAnswer) {
+      return res.status(400).json({ message: 'Jawaban keamanan salah!' });
+    }
+    db.adminPassword = newPassword;
+    await saveDb(db);
+    res.json({ message: 'Password berhasil diriset!' });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
 });
 
 // --- FILE UPLOAD ---
@@ -244,8 +293,19 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 
 // --- VILLAGE INFO ---
 app.get('/api/village-info', async (req, res) => {
-  try { const db = await fetchDb(); res.json(db.villageInfo || {}); }
-  catch (e) { res.status(500).json({ message: e.message }); }
+  try {
+    const db = await fetchDb();
+    if (req.query.increment === 'true') {
+      if (!db.villageInfo) db.villageInfo = {};
+      if (!db.villageInfo.stats) db.villageInfo.stats = {};
+      const current = parseInt(db.villageInfo.stats.visitors || '1204', 10);
+      db.villageInfo.stats.visitors = String(current + 1);
+      await saveDb(db);
+    }
+    res.json(db.villageInfo || {});
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
 });
 
 app.put('/api/village-info', async (req, res) => {
