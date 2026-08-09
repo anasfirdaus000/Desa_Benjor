@@ -182,7 +182,7 @@ const initialVillageInfo: VillageInfo = {
     kk: '435',
     sementara: '12',
     mutasi: '5',
-    visitors: '1204'
+    visitors: '0'
   }
 };
 

@@ -158,6 +158,15 @@
       "address": "Jl. Raya Benjor No. 1, Tumpang, Malang",
       "email": "info@benjor.desa.id",
       "phone": "(0341) 789012"
+    },
+    "stats": {
+      "area": "450 Ha",
+      "rt": "15",
+      "rw": "4",
+      "kk": "435",
+      "sementara": "12",
+      "mutasi": "5",
+      "visitors": "0"
     }
   },
   "wisata": [

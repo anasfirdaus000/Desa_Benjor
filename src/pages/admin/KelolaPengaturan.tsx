@@ -367,13 +367,15 @@ const KelolaPengaturan = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Pengunjung Website (Asli)</label>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-350">Pengunjung Website (Realtime)</label>
+                <span className="text-[10px] bg-green-100 dark:bg-green-950 text-[#2D5A27] dark:text-green-400 font-bold px-2 py-0.5 rounded-full border border-green-200/50">Otomatis</span>
+              </div>
               <input 
                 type="text" 
                 value={formData.statsVisitors} 
-                onChange={(e) => setFormData({...formData, statsVisitors: e.target.value})}
-                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-855 dark:text-white"
-                required
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 outline-none cursor-not-allowed"
+                readOnly
               />
             </div>
           </div>

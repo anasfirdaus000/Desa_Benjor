@@ -298,7 +298,7 @@ app.get('/api/village-info', async (req, res) => {
     if (req.query.increment === 'true') {
       if (!db.villageInfo) db.villageInfo = {};
       if (!db.villageInfo.stats) db.villageInfo.stats = {};
-      const current = parseInt(db.villageInfo.stats.visitors || '1204', 10);
+      const current = parseInt(db.villageInfo.stats.visitors || '0', 10);
       db.villageInfo.stats.visitors = String(current + 1);
       await saveDb(db);
     }
