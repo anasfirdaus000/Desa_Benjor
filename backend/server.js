@@ -74,10 +74,14 @@ const hasSupabase =
   supabaseKey && 
   supabaseKey !== 'your_supabase_key';
 
-const supabase = hasSupabase ? createClient(supabaseUrl, supabaseKey) : null;
-
-if (supabase) {
-  console.log('⚡ Supabase database connection initialized successfully.');
+let supabase = null;
+if (hasSupabase) {
+  try {
+    supabase = createClient(supabaseUrl, supabaseKey);
+    console.log('⚡ Supabase database connection initialized successfully.');
+  } catch (err) {
+    console.error('⚠️ Failed to initialize Supabase client:', err.message);
+  }
 } else {
   console.log('⚠️ Supabase not configured. Using local fallback database: /backend/db.json');
 }

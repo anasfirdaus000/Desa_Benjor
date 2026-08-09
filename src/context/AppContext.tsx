@@ -252,8 +252,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       });
       
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        const errMsg = errData.message || res.statusText || 'Gagal menyimpan perubahan';
+        let errMsg = '';
+        try {
+          const errData = await res.json();
+          errMsg = errData.message || res.statusText || 'Gagal menyimpan perubahan';
+        } catch {
+          const textData = await res.text().catch(() => '');
+          errMsg = textData.substring(0, 150) || res.statusText || 'Gagal menyimpan perubahan';
+        }
         console.error(`Sync failed for ${url}:`, errMsg);
         alert(`Peringatan: Gagal menyimpan data ke database server.\nDetail: ${errMsg}\n\nPeriksa konfigurasi Row Level Security (RLS) di Supabase Anda.`);
       }
