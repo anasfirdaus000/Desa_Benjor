@@ -258,15 +258,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           errMsg = errData.message || res.statusText || 'Gagal menyimpan perubahan';
         } catch {
           const textData = await res.text().catch(() => '');
-          errMsg = textData.substring(0, 150) || res.statusText || 'Gagal menyimpan perubahan';
+          errMsg = textData.substring(0, 200) || res.statusText || 'Gagal menyimpan perubahan';
         }
         console.error(`Sync failed for ${url}:`, errMsg);
-        alert(`Peringatan: Gagal menyimpan data ke database server.\nDetail: ${errMsg}\n\nPeriksa konfigurasi Row Level Security (RLS) di Supabase Anda.`);
+        // Only show blocking alert for critical failures (auth errors, server crash)
+        // For Supabase DB errors, data is already saved locally so just log
+        if (res.status === 401) {
+          alert('Sesi login Anda telah berakhir. Silakan login ulang.');
+        } else if (res.status >= 500) {
+          alert(`Peringatan: ${errMsg}`);
+        }
       }
       return res.ok;
     } catch (e) {
       console.error(`Error syncing with ${url}:`, e);
-      alert('Peringatan: Koneksi internet terputus atau server offline. Perubahan tidak tersimpan ke database cloud.');
       return false;
     }
   };

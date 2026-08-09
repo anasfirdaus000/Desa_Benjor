@@ -6,7 +6,6 @@ import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createClient } from '@supabase/supabase-js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,177 +15,159 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Automatic async route error catching patch
-const patchMethod = (method) => {
-  const original = app[method].bind(app);
-  app[method] = (path, ...callbacks) => {
-    const wrapped = callbacks.map(cb => {
-      if (typeof cb !== 'function') return cb;
-      return (req, res, next) => {
-        try {
-          const result = cb(req, res, next);
-          if (result && typeof result.catch === 'function') {
-            result.catch(next);
-          }
-        } catch (err) {
-          next(err);
-        }
-      };
-    });
-    return original(path, ...wrapped);
-  };
-};
-patchMethod('get');
-patchMethod('post');
-patchMethod('put');
-patchMethod('delete');
-
 app.use(cors());
 app.use(express.json());
 
 // Ensure local uploads folder exists for fallback uploads
 const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
+try {
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  app.use('/uploads', express.static(uploadsDir));
+} catch (e) {
+  console.warn('Could not setup local uploads dir:', e.message);
 }
-app.use('/uploads', express.static(uploadsDir));
 
 // Database path
 const dbPath = path.join(__dirname, 'db.json');
 
-// --- SUPABASE CLIENT SETUP ---
-let supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
+// --- SUPABASE CREDENTIALS ---
+let supabaseUrl = (process.env.SUPABASE_URL || '').trim();
+const supabaseKey = (process.env.SUPABASE_KEY || '').trim();
 
-// Sanitize URL by removing /rest/v1 suffix if present
-if (supabaseUrl) {
-  supabaseUrl = supabaseUrl.trim();
-  if (supabaseUrl.endsWith('/rest/v1/')) {
-    supabaseUrl = supabaseUrl.replace(/\/rest\/v1\/$/, '');
-  } else if (supabaseUrl.endsWith('/rest/v1')) {
-    supabaseUrl = supabaseUrl.replace(/\/rest\/v1$/, '');
-  }
-}
+// Strip any /rest/v1 suffix from URL
+supabaseUrl = supabaseUrl.replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '');
 
-const hasSupabase = 
-  supabaseUrl && 
-  supabaseUrl !== 'your_supabase_url' && 
-  supabaseKey && 
+const hasSupabase =
+  supabaseUrl &&
+  supabaseUrl !== 'your_supabase_url' &&
+  supabaseKey &&
   supabaseKey !== 'your_supabase_key';
 
-let supabase = null;
 if (hasSupabase) {
-  try {
-    supabase = createClient(supabaseUrl, supabaseKey);
-    console.log('⚡ Supabase database connection initialized successfully.');
-  } catch (err) {
-    console.error('⚠️ Failed to initialize Supabase client:', err.message);
-  }
+  console.log('⚡ Supabase credentials loaded for project:', supabaseUrl.split('.')[0].split('//')[1]);
 } else {
-  console.log('⚠️ Supabase not configured. Using local fallback database: /backend/db.json');
+  console.log('⚠️ Supabase not configured. Using local fallback db.json');
 }
 
-// Local read backup (falls back to /tmp/db.json if writable backup exists, e.g. on Vercel)
+// --- SUPABASE REST HELPERS (raw fetch, avoids @supabase/supabase-js ECONNRESET bug) ---
+const supabaseHeaders = () => ({
+  'apikey': supabaseKey,
+  'Authorization': `Bearer ${supabaseKey}`,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=minimal'
+});
+
+const supabaseSelect = async () => {
+  const url = `${supabaseUrl}/rest/v1/desa_benjor_db?id=eq.1&select=data`;
+  const res = await fetch(url, { headers: supabaseHeaders() });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Supabase SELECT error ${res.status}: ${text}`);
+  }
+  const rows = await res.json();
+  return rows[0]?.data || null;
+};
+
+const supabaseUpsert = async (data) => {
+  const url = `${supabaseUrl}/rest/v1/desa_benjor_db`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { ...supabaseHeaders(), 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({ id: 1, data })
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Supabase UPSERT error ${res.status}: ${text}`);
+  }
+  return true;
+};
+
+// --- LOCAL FILE HELPERS ---
 const readLocalDb = () => {
+  // Try /tmp first (Vercel serverless writeable dir)
+  const tmpPath = '/tmp/db.json';
   try {
-    const tmpPath = path.join('/tmp', 'db.json');
     if (fs.existsSync(tmpPath)) {
-      const data = fs.readFileSync(tmpPath, 'utf8');
-      return JSON.parse(data);
+      const raw = fs.readFileSync(tmpPath, 'utf8');
+      const parsed = JSON.parse(raw);
+      // Only use if it has actual content
+      if (parsed && Object.keys(parsed).length > 2) return parsed;
     }
   } catch (e) {
-    console.warn('Could not read from /tmp/db.json, trying packaged file...', e.message);
+    console.warn('Could not read /tmp/db.json:', e.message);
   }
-
+  // Fallback to packaged db.json
   try {
-    const data = fs.readFileSync(dbPath, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading db.json, returning empty structure:', error);
+    const raw = fs.readFileSync(dbPath, 'utf8');
+    return JSON.parse(raw);
+  } catch (e) {
+    console.error('Could not read db.json:', e.message);
     return { sliderImages: [], sotk: [], umkm: [], berita: [], infografis: {}, villageInfo: {}, wisata: [] };
   }
 };
 
-// Local write backup (safely handles read-only filesystems by trying /tmp as backup)
 const writeLocalDb = (data) => {
+  // Try writing to packaged path first
   try {
     fs.writeFileSync(dbPath, JSON.stringify(data, null, 2), 'utf8');
-  } catch (error) {
-    console.warn('Error writing packaged db.json (read-only filesystem), saving to /tmp/db.json...', error.message);
-    try {
-      const tmpPath = path.join('/tmp', 'db.json');
-      fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2), 'utf8');
-    } catch (tmpError) {
-      console.error('Failed to write backup to /tmp/db.json:', tmpError.message);
-    }
+    return;
+  } catch (e) {
+    // Read-only filesystem (Vercel), fall back to /tmp
+  }
+  try {
+    fs.writeFileSync('/tmp/db.json', JSON.stringify(data, null, 2), 'utf8');
+  } catch (e) {
+    console.error('Could not write to /tmp/db.json:', e.message);
   }
 };
 
-// Unified dynamic read interface (Supabase cloud first, local db.json fallback)
+// --- UNIFIED DB READ ---
 const fetchDb = async () => {
-  if (supabase) {
+  if (hasSupabase) {
     try {
-      const { data, error } = await supabase
-        .from('desa_benjor_db')
-        .select('data')
-        .eq('id', 1)
-        .single();
-
-      if (data && data.data) {
-        return data.data;
-      }
-      
-      // If table is empty or row does not exist, initialize it
-      console.log('Supabase table empty or row not found. Initializing with default local data...');
+      const cloudData = await supabaseSelect();
+      if (cloudData) return cloudData;
+      // Row not found, seed with local data
       const localData = readLocalDb();
-      const { error: initError } = await supabase.from('desa_benjor_db').upsert({ id: 1, data: localData });
-      if (initError) {
-        console.warn('Initial Supabase seed failed, RLS might be active:', initError.message);
+      try {
+        await supabaseUpsert(localData);
+        console.log('Database seeded to Supabase from local db.json');
+      } catch (seedErr) {
+        console.warn('Could not seed Supabase (check RLS settings):', seedErr.message);
       }
       return localData;
     } catch (err) {
-      console.warn('Supabase query failed, falling back to local db.json:', err.message);
-      return readLocalDb();
+      console.warn('Supabase read failed, using local fallback:', err.message);
     }
   }
   return readLocalDb();
 };
 
-// Unified dynamic write interface (writes local backup and syncs to Supabase cloud)
+// --- UNIFIED DB WRITE ---
+// Never throws — saves locally first, then attempts cloud sync
 const saveDb = async (newData) => {
-  writeLocalDb(newData); // Always update local backup
-
-  if (supabase) {
-    const { error: updateError } = await supabase
-      .from('desa_benjor_db')
-      .update({ data: newData })
-      .eq('id', 1);
-
-    if (updateError) {
-      console.warn('Supabase update failed, trying upsert...', updateError.message);
-      const { error: upsertError } = await supabase
-        .from('desa_benjor_db')
-        .upsert({ id: 1, data: newData });
-
-      if (upsertError) {
-        console.error('Supabase upsert failed too:', upsertError.message);
-        throw new Error(`Database Supabase Error: ${upsertError.message}`);
-      }
+  writeLocalDb(newData);
+  if (hasSupabase) {
+    try {
+      await supabaseUpsert(newData);
+    } catch (err) {
+      // Log but don't crash — local write was already successful
+      console.warn('Supabase write skipped (check RLS):', err.message);
+      throw err; // Re-throw so routes can return error info to client
     }
   }
 };
 
-// Check if Cloudinary is fully configured
-const isCloudinaryConfigured = () => {
-  return (
-    process.env.CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_CLOUD_NAME !== 'your_cloud_name' &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_KEY !== 'your_api_key' &&
-    process.env.CLOUDINARY_API_SECRET &&
-    process.env.CLOUDINARY_API_SECRET !== 'your_api_secret'
-  );
-};
+// --- CLOUDINARY SETUP ---
+const isCloudinaryConfigured = () =>
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_CLOUD_NAME !== 'your_cloud_name' &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_KEY !== 'your_api_key' &&
+  process.env.CLOUDINARY_API_SECRET &&
+  process.env.CLOUDINARY_API_SECRET !== 'your_api_secret';
 
 if (isCloudinaryConfigured()) {
   cloudinary.config({
@@ -194,21 +175,40 @@ if (isCloudinaryConfigured()) {
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
   });
-  console.log('☁️ Cloudinary integration initialized successfully.');
+  console.log('☁️ Cloudinary integration initialized.');
 } else {
-  console.log('⚠️ Cloudinary not configured. Uploads will fallback to local folder: /backend/uploads/');
+  console.log('⚠️ Cloudinary not configured. Image uploads will use local storage.');
 }
 
-// Multer configuration for uploads
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+// Multer
+const upload = multer({ storage: multer.memoryStorage() });
 
-// --- AUTH ROUTE ---
+// --- ADMIN VALIDATION ---
+const validateAdmin = (req) => {
+  const auth = req.headers.authorization;
+  return auth && auth.startsWith('Bearer ');
+};
+
+// --- SAVE HELPER (catches & returns error to client) ---
+const trySave = async (res, data, successBody) => {
+  try {
+    await saveDb(data);
+    return res.json(successBody);
+  } catch (err) {
+    console.error('Save failed:', err.message);
+    return res.status(500).json({ message: err.message || 'Gagal menyimpan perubahan ke database' });
+  }
+};
+
+// ========================
+//   R O U T E S
+// ========================
+
+// --- AUTH ---
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
   const envUser = process.env.ADMIN_USERNAME || 'admin';
   const envPass = process.env.ADMIN_PASSWORD || 'admin';
-
   if (username === envUser && password === envPass) {
     const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
     return res.json({ token, username });
@@ -216,247 +216,267 @@ app.post('/api/auth/login', (req, res) => {
   return res.status(401).json({ message: 'Username atau Password salah!' });
 });
 
-// Admin validation helper
-const validateAdmin = (req) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) return false;
-  return true;
-};
-
-// --- FILE UPLOAD TO CLOUDINARY OR LOCAL FALLBACK ---
+// --- FILE UPLOAD ---
 app.post('/api/upload', upload.single('file'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'Tidak ada berkas yang diunggah!' });
-  }
-
+  if (!req.file) return res.status(400).json({ message: 'Tidak ada berkas yang diunggah!' });
   try {
     if (isCloudinaryConfigured()) {
-      const uploadStream = () => {
-        return new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            { folder: 'desa_benjor', resource_type: 'auto' },
-            (error, result) => {
-              if (error) return reject(error);
-              resolve(result);
-            }
-          );
-          stream.end(req.file.buffer);
-        });
-      };
-
-      const result = await uploadStream();
-      console.log('File successfully uploaded to Cloudinary:', result.secure_url);
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'desa_benjor', resource_type: 'auto' },
+          (error, result) => (error ? reject(error) : resolve(result))
+        );
+        stream.end(req.file.buffer);
+      });
       return res.json({ url: result.secure_url });
     } else {
       const ext = path.extname(req.file.originalname);
       const filename = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}${ext}`;
       const filePath = path.join(uploadsDir, filename);
-
       fs.writeFileSync(filePath, req.file.buffer);
-      const fileUrl = `http://localhost:${PORT}/uploads/${filename}`;
-      console.log('File successfully saved locally:', fileUrl);
-      return res.json({ url: fileUrl });
+      return res.json({ url: `http://localhost:${PORT}/uploads/${filename}` });
     }
   } catch (error) {
-    console.error('File upload failed:', error);
+    console.error('Upload failed:', error);
     return res.status(500).json({ message: 'Gagal mengunggah berkas', error: error.message });
   }
 });
 
-// --- VILLAGE INFO API ---
+// --- VILLAGE INFO ---
 app.get('/api/village-info', async (req, res) => {
-  const db = await fetchDb();
-  res.json(db.villageInfo);
+  try { const db = await fetchDb(); res.json(db.villageInfo || {}); }
+  catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 app.put('/api/village-info', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = await fetchDb();
-  db.villageInfo = { ...db.villageInfo, ...req.body };
-  await saveDb(db);
-  res.json(db.villageInfo);
+  try {
+    const db = await fetchDb();
+    db.villageInfo = { ...db.villageInfo, ...req.body };
+    await trySave(res, db, db.villageInfo);
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-// --- SLIDER IMAGES API ---
+// --- SLIDER IMAGES ---
 app.get('/api/slider', async (req, res) => {
-  const db = await fetchDb();
-  res.json(db.sliderImages);
+  try { const db = await fetchDb(); res.json(db.sliderImages || []); }
+  catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 app.post('/api/slider', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = await fetchDb();
-  const newSlide = { id: String(Date.now()), ...req.body };
-  db.sliderImages.push(newSlide);
-  await saveDb(db);
-  res.json(newSlide);
+  try {
+    const db = await fetchDb();
+    const newSlide = { id: String(Date.now()), ...req.body };
+    db.sliderImages = [...(db.sliderImages || []), newSlide];
+    await trySave(res, db, newSlide);
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 app.delete('/api/slider/:id', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = await fetchDb();
-  db.sliderImages = db.sliderImages.filter(s => s.id !== req.params.id);
-  await saveDb(db);
-  res.json({ message: 'Slide deleted' });
+  try {
+    const db = await fetchDb();
+    db.sliderImages = (db.sliderImages || []).filter(s => s.id !== req.params.id);
+    await trySave(res, db, { message: 'Slide deleted' });
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-// --- BERITA CRUD API ---
+// --- BERITA ---
 app.get('/api/berita', async (req, res) => {
-  const db = await fetchDb();
-  res.json(db.berita);
+  try { const db = await fetchDb(); res.json(db.berita || []); }
+  catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 app.post('/api/berita', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = await fetchDb();
-  const newBerita = { id: String(Date.now()), ...req.body };
-  db.berita.unshift(newBerita);
-  await saveDb(db);
-  res.json(newBerita);
+  try {
+    const db = await fetchDb();
+    const newBerita = { id: String(Date.now()), ...req.body };
+    db.berita = [newBerita, ...(db.berita || [])];
+    await trySave(res, db, newBerita);
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 app.put('/api/berita/:id', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = await fetchDb();
-  db.berita = db.berita.map(item => item.id === req.params.id ? { ...item, ...req.body } : item);
-  await saveDb(db);
-  res.json({ message: 'Berita updated' });
+  try {
+    const db = await fetchDb();
+    db.berita = (db.berita || []).map(item => item.id === req.params.id ? { ...item, ...req.body } : item);
+    await trySave(res, db, { message: 'Berita updated' });
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 app.delete('/api/berita/:id', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = await fetchDb();
-  db.berita = db.berita.filter(item => item.id !== req.params.id);
-  await saveDb(db);
-  res.json({ message: 'Berita deleted' });
+  try {
+    const db = await fetchDb();
+    db.berita = (db.berita || []).filter(item => item.id !== req.params.id);
+    await trySave(res, db, { message: 'Berita deleted' });
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-// --- UMKM CRUD API ---
+// --- UMKM ---
 app.get('/api/umkm', async (req, res) => {
-  const db = await fetchDb();
-  res.json(db.umkm);
+  try { const db = await fetchDb(); res.json(db.umkm || []); }
+  catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 app.post('/api/umkm', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = await fetchDb();
-  const newProduct = { id: String(Date.now()), ...req.body };
-  db.umkm.unshift(newProduct);
-  await saveDb(db);
-  res.json(newProduct);
+  try {
+    const db = await fetchDb();
+    const newProduct = { id: String(Date.now()), ...req.body };
+    db.umkm = [newProduct, ...(db.umkm || [])];
+    await trySave(res, db, newProduct);
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 app.put('/api/umkm/:id', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = await fetchDb();
-  db.umkm = db.umkm.map(item => item.id === req.params.id ? { ...item, ...req.body } : item);
-  await saveDb(db);
-  res.json({ message: 'Product updated' });
+  try {
+    const db = await fetchDb();
+    db.umkm = (db.umkm || []).map(item => item.id === req.params.id ? { ...item, ...req.body } : item);
+    await trySave(res, db, { message: 'Product updated' });
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 app.delete('/api/umkm/:id', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = await fetchDb();
-  db.umkm = db.umkm.filter(item => item.id !== req.params.id);
-  await saveDb(db);
-  res.json({ message: 'Product deleted' });
+  try {
+    const db = await fetchDb();
+    db.umkm = (db.umkm || []).filter(item => item.id !== req.params.id);
+    await trySave(res, db, { message: 'Product deleted' });
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-// --- SOTK CRUD API ---
+// --- SOTK ---
 app.get('/api/sotk', async (req, res) => {
-  const db = await fetchDb();
-  res.json(db.sotk);
+  try { const db = await fetchDb(); res.json(db.sotk || []); }
+  catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 app.post('/api/sotk', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = await fetchDb();
-  const newMember = { id: String(Date.now()), ...req.body };
-  db.sotk.push(newMember);
-  await saveDb(db);
-  res.json(newMember);
+  try {
+    const db = await fetchDb();
+    const newMember = { id: String(Date.now()), ...req.body };
+    db.sotk = [...(db.sotk || []), newMember];
+    await trySave(res, db, newMember);
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 app.put('/api/sotk/:id', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = await fetchDb();
-  db.sotk = db.sotk.map(member => member.id === req.params.id ? { ...member, ...req.body } : member);
-  await saveDb(db);
-  res.json({ message: 'SOTK member updated' });
+  try {
+    const db = await fetchDb();
+    db.sotk = (db.sotk || []).map(m => m.id === req.params.id ? { ...m, ...req.body } : m);
+    await trySave(res, db, { message: 'SOTK member updated' });
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 app.delete('/api/sotk/:id', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = await fetchDb();
-  db.sotk = db.sotk.filter(member => member.id !== req.params.id);
-  await saveDb(db);
-  res.json({ message: 'SOTK member deleted' });
+  try {
+    const db = await fetchDb();
+    db.sotk = (db.sotk || []).filter(m => m.id !== req.params.id);
+    await trySave(res, db, { message: 'SOTK member deleted' });
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-// --- INFOGRAFIS API ---
+// --- INFOGRAFIS ---
 app.get('/api/infografis', async (req, res) => {
-  const db = await fetchDb();
-  res.json(db.infografis);
+  try { const db = await fetchDb(); res.json(db.infografis || {}); }
+  catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 app.put('/api/infografis', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = await fetchDb();
-  db.infografis = { ...db.infografis, ...req.body };
-  await saveDb(db);
-  res.json(db.infografis);
+  try {
+    const db = await fetchDb();
+    db.infografis = { ...db.infografis, ...req.body };
+    await trySave(res, db, db.infografis);
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-// --- WISATA & KOMENTAR API ---
+// --- WISATA ---
 app.get('/api/wisata', async (req, res) => {
-  const db = await fetchDb();
-  res.json(db.wisata || []);
+  try { const db = await fetchDb(); res.json(db.wisata || []); }
+  catch (e) { res.status(500).json({ message: e.message }); }
 });
 
+app.post('/api/wisata', async (req, res) => {
+  if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
+  try {
+    const db = await fetchDb();
+    const newWisata = { id: String(Date.now()), comments: [], photos: [], ...req.body };
+    db.wisata = [newWisata, ...(db.wisata || [])];
+    await trySave(res, db, newWisata);
+  } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
+app.put('/api/wisata/:id', async (req, res) => {
+  if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
+  try {
+    const db = await fetchDb();
+    db.wisata = (db.wisata || []).map(w => w.id === req.params.id ? { ...w, ...req.body } : w);
+    await trySave(res, db, { message: 'Wisata updated' });
+  } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
+app.delete('/api/wisata/:id', async (req, res) => {
+  if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
+  try {
+    const db = await fetchDb();
+    db.wisata = (db.wisata || []).filter(w => w.id !== req.params.id);
+    await trySave(res, db, { message: 'Wisata deleted' });
+  } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
+// --- WISATA KOMENTAR ---
 app.post('/api/wisata/:id/comments', async (req, res) => {
   const { name, text } = req.body;
-  if (!name || !text) {
-    return res.status(400).json({ message: 'Nama dan komentar tidak boleh kosong!' });
-  }
-  const db = await fetchDb();
-  const wisataItem = db.wisata?.find(w => w.id === req.params.id);
-  if (!wisataItem) {
-    return res.status(404).json({ message: 'Objek wisata tidak ditemukan!' });
-  }
-  const newComment = {
-    id: String(Date.now()),
-    name,
-    text,
-    date: new Date().toISOString().split('T')[0]
-  };
-  if (!wisataItem.comments) wisataItem.comments = [];
-  wisataItem.comments.push(newComment);
-  await saveDb(db);
-  res.json(newComment);
+  if (!name || !text) return res.status(400).json({ message: 'Nama dan komentar tidak boleh kosong!' });
+  try {
+    const db = await fetchDb();
+    const wisataItem = (db.wisata || []).find(w => w.id === req.params.id);
+    if (!wisataItem) return res.status(404).json({ message: 'Objek wisata tidak ditemukan!' });
+    if (!wisataItem.comments) wisataItem.comments = [];
+    const newComment = { id: String(Date.now()), name, text, date: new Date().toISOString().split('T')[0] };
+    wisataItem.comments.push(newComment);
+    await trySave(res, db, newComment);
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 app.delete('/api/wisata/:id/comments/:commentId', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const db = await fetchDb();
-  const wisataItem = db.wisata?.find(w => w.id === req.params.id);
-  if (!wisataItem) {
-    return res.status(404).json({ message: 'Objek wisata tidak ditemukan!' });
-  }
-  if (!wisataItem.comments) wisataItem.comments = [];
-  wisataItem.comments = wisataItem.comments.filter(c => c.id !== req.params.commentId);
-  await saveDb(db);
-  res.json({ message: 'Komentar berhasil dihapus' });
+  try {
+    const db = await fetchDb();
+    const wisataItem = (db.wisata || []).find(w => w.id === req.params.id);
+    if (!wisataItem) return res.status(404).json({ message: 'Objek wisata tidak ditemukan!' });
+    wisataItem.comments = (wisataItem.comments || []).filter(c => c.id !== req.params.commentId);
+    await trySave(res, db, { message: 'Komentar berhasil dihapus' });
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-// --- CENTRAL ERROR-HANDLING MIDDLEWARE ---
-app.use((err, req, res, next) => {
-  console.error('API Server Error:', err);
-  res.status(500).json({ message: err.message || 'Terjadi kesalahan internal pada server' });
+// --- DB HEALTH CHECK (useful for Vercel log debugging) ---
+app.get('/api/health', async (req, res) => {
+  const status = { supabase: hasSupabase, cloudinary: isCloudinaryConfigured(), localDb: fs.existsSync(dbPath) };
+  if (hasSupabase) {
+    try {
+      await supabaseSelect();
+      status.supabaseReachable = true;
+    } catch (e) {
+      status.supabaseReachable = false;
+      status.supabaseError = e.message;
+    }
+  }
+  res.json(status);
 });
 
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
-    console.log(`🚀 Backend server is running on http://localhost:${PORT}`);
+    console.log(`🚀 Backend server running on http://localhost:${PORT}`);
   });
 }
 

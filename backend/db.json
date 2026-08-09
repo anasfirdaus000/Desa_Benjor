@@ -1,28 +1,149 @@
 {
   "sliderImages": [
-    { "id": "1", "url": "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80" },
-    { "id": "2", "url": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80" }
+    {
+      "id": "1",
+      "url": "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "2",
+      "url": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80"
+    }
   ],
   "sotk": [
-    { "id": "1", "name": "IMAM MUNIR, SH", "position": "Kepala Desa", "level": 1, "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=200&h=200" },
-    { "id": "2", "name": "BUDI SANTOSO", "position": "Sekretaris Desa", "level": 2, "image": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=200&h=200" },
-    { "id": "3", "name": "SITI AMINAH", "position": "Kaur Keuangan", "level": 3, "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200&h=200" },
-    { "id": "4", "name": "AHMAD FAUZI", "position": "Kasie Pemerintahan", "level": 3, "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200&h=200" },
-    { "id": "5", "name": "JOKO WIDODO", "position": "Kepala Dusun I", "level": 4, "image": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200&h=200" }
+    {
+      "id": "1",
+      "name": "IMAM MUNIR, SH",
+      "position": "Kepala Desa",
+      "level": 1,
+      "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=200&h=200"
+    },
+    {
+      "id": "2",
+      "name": "BUDI SANTOSO",
+      "position": "Sekretaris Desa",
+      "level": 2,
+      "image": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=200&h=200"
+    },
+    {
+      "id": "3",
+      "name": "SITI AMINAH",
+      "position": "Kaur Keuangan",
+      "level": 3,
+      "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200&h=200"
+    },
+    {
+      "id": "4",
+      "name": "AHMAD FAUZI",
+      "position": "Kasie Pemerintahan",
+      "level": 3,
+      "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200&h=200"
+    },
+    {
+      "id": "5",
+      "name": "JOKO WIDODO",
+      "position": "Kepala Dusun I",
+      "level": 4,
+      "image": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200&h=200"
+    }
   ],
   "umkm": [
-    { "id": "1", "name": "Kripik Singkong Benjor", "price": 15000, "description": "Kripik singkong renyah khas desa", "owner": "Bu Ningsih", "wa": "6281234567890", "category": "Kuliner", "image": "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&q=80" },
-    { "id": "2", "name": "Kerajinan Anyaman Bambu", "price": 50000, "description": "Anyaman bambu berkualitas tinggi", "owner": "Pak Tarno", "wa": "6281234567891", "category": "Kerajinan", "image": "https://images.unsplash.com/photo-1590736969955-71cc94801759?auto=format&fit=crop&q=80" },
-    { "id": "3", "name": "Kopi Bubuk Asli", "price": 35000, "description": "Kopi bubuk robusta dari petani lokal", "owner": "Cak Nur", "wa": "6281234567892", "category": "Hasil Tani", "image": "https://images.unsplash.com/photo-1559525839-b184a4d698c7?auto=format&fit=crop&q=80" }
+    {
+      "id": "1",
+      "name": "Kripik Singkong Benjor",
+      "price": 15000,
+      "description": "Kripik singkong renyah khas desa",
+      "owner": "Bu Ningsih",
+      "wa": "6281234567890",
+      "category": "Kuliner",
+      "image": "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "2",
+      "name": "Kerajinan Anyaman Bambu",
+      "price": 50000,
+      "description": "Anyaman bambu berkualitas tinggi",
+      "owner": "Pak Tarno",
+      "wa": "6281234567891",
+      "category": "Kerajinan",
+      "image": "https://images.unsplash.com/photo-1590736969955-71cc94801759?auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "3",
+      "name": "Kopi Bubuk Asli",
+      "price": 35000,
+      "description": "Kopi bubuk robusta dari petani lokal",
+      "owner": "Cak Nur",
+      "wa": "6281234567892",
+      "category": "Hasil Tani",
+      "image": "https://images.unsplash.com/photo-1559525839-b184a4d698c7?auto=format&fit=crop&q=80"
+    }
   ],
   "berita": [
-    { "id": "1", "title": "Penyaluran BLT Dana Desa Tahap I", "summary": "Pemerintah Desa Benjor telah menyalurkan Bantuan Langsung Tunai (BLT)...", "content": "Konten lengkap...", "category": "Pemerintahan", "date": "2023-10-01", "image": "https://images.unsplash.com/photo-1591522810850-58128c5fb089?auto=format&fit=crop&q=80" },
-    { "id": "2", "title": "Kerja Bakti Membersihkan Saluran Air", "summary": "Warga desa antusias mengikuti kerja bakti dalam rangka persiapan musim hujan...", "content": "Konten lengkap...", "category": "Kegiatan Warga", "date": "2023-10-05", "image": "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&q=80" }
+    {
+      "id": "1786243228872",
+      "title": "Test Berita",
+      "summary": "Test",
+      "content": "Test content",
+      "category": "Test",
+      "date": "2025-01-01",
+      "image": ""
+    },
+    {
+      "id": "1",
+      "title": "Penyaluran BLT Dana Desa Tahap I",
+      "summary": "Pemerintah Desa Benjor telah menyalurkan Bantuan Langsung Tunai (BLT)...",
+      "content": "Konten lengkap...",
+      "category": "Pemerintahan",
+      "date": "2023-10-01",
+      "image": "https://images.unsplash.com/photo-1591522810850-58128c5fb089?auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "2",
+      "title": "Kerja Bakti Membersihkan Saluran Air",
+      "summary": "Warga desa antusias mengikuti kerja bakti dalam rangka persiapan musim hujan...",
+      "content": "Konten lengkap...",
+      "category": "Kegiatan Warga",
+      "date": "2023-10-05",
+      "image": "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&q=80"
+    }
   ],
   "infografis": {
-    "penduduk": { "labels": ["Laki-laki", "Perempuan"], "data": [1500, 1600] },
-    "apbdes": { "labels": ["Pendapatan Asli Desa", "Dana Desa", "Bantuan Kabupaten", "Lain-lain"], "data": [50, 800, 200, 50] },
-    "bansos": { "labels": ["PKH", "BPNT", "BLT DD"], "data": [200, 350, 150] }
+    "penduduk": {
+      "labels": [
+        "Laki-laki",
+        "Perempuan"
+      ],
+      "data": [
+        1500,
+        1600
+      ]
+    },
+    "apbdes": {
+      "labels": [
+        "Pendapatan Asli Desa",
+        "Dana Desa",
+        "Bantuan Kabupaten",
+        "Lain-lain"
+      ],
+      "data": [
+        50,
+        800,
+        200,
+        50
+      ]
+    },
+    "bansos": {
+      "labels": [
+        "PKH",
+        "BPNT",
+        "BLT DD"
+      ],
+      "data": [
+        200,
+        350,
+        150
+      ]
+    }
   },
   "villageInfo": {
     "headName": "IMAM MUNIR, SH",
@@ -51,7 +172,12 @@
       ],
       "desc": "Pesona air terjun tersembunyi dengan alam yang asri di Desa Benjor, menawarkan kesegaran air pegunungan yang murni dan pemandangan hijau di sekelilingnya.",
       "comments": [
-        { "id": "1", "name": "Budi", "text": "Pemandangannya sangat indah dan udaranya sejuk sekali!", "date": "2026-08-01" }
+        {
+          "id": "1",
+          "name": "Budi",
+          "text": "Pemandangannya sangat indah dan udaranya sejuk sekali!",
+          "date": "2026-08-01"
+        }
       ]
     },
     {
@@ -65,7 +191,12 @@
       ],
       "desc": "Keindahan pemandangan dari puncak bukit di pagi hari di mana Anda serasa berdiri di atas awan, menjadikannya spot foto terpopuler bagi kaum muda.",
       "comments": [
-        { "id": "1", "name": "Dewi", "text": "Datang pagi hari sebelum subuh, pemandangan sunrise-nya juara banget!", "date": "2026-08-02" }
+        {
+          "id": "1",
+          "name": "Dewi",
+          "text": "Datang pagi hari sebelum subuh, pemandangan sunrise-nya juara banget!",
+          "date": "2026-08-02"
+        }
       ]
     },
     {
