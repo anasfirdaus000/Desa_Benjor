@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { useImageUpload } from '../../hooks/useImageUpload';
-import { Trash2, Upload, Image as ImageIcon, Check } from 'lucide-react';
+import { Trash2, Upload, Image as ImageIcon } from 'lucide-react';
 
 const KelolaMedia = () => {
   const { sliderImages, setSliderImages } = useAppContext();
@@ -9,6 +9,7 @@ const KelolaMedia = () => {
   
   const [newTitle, setNewTitle] = useState('');
   const [newSubtitle, setNewSubtitle] = useState('');
+  const [newAlign, setNewAlign] = useState('center');
 
   const handleAddSlider = () => {
     if (!previewUrl || isUploading) return;
@@ -16,11 +17,13 @@ const KelolaMedia = () => {
       id: Date.now().toString(),
       url: previewUrl,
       title: newTitle.trim() || undefined,
-      subtitle: newSubtitle.trim() || undefined
+      subtitle: newSubtitle.trim() || undefined,
+      align: newAlign
     };
     setSliderImages([...sliderImages, newImage]);
     setNewTitle('');
     setNewSubtitle('');
+    setNewAlign('center');
     clearImage();
     // Reset file input
     const fileInput = document.getElementById('slider-upload') as HTMLInputElement;
@@ -37,21 +40,25 @@ const KelolaMedia = () => {
     setSliderImages(sliderImages.map(img => img.id === id ? { ...img, [field]: val } : img));
   };
 
+  const handleUpdateAlign = (id: string, align: string) => {
+    setSliderImages(sliderImages.map(img => img.id === id ? { ...img, align } : img));
+  };
+
   return (
     <div className="space-y-6 text-gray-800 dark:text-gray-250">
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-6">
         <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Kelola Media & Slider Hero</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Tambahkan gambar banner slider halaman utama dan atur judul/subjudul per slide.</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Tambahkan gambar banner slider halaman utama dan atur bagian pemotongan gambar (Focal Point) agar pas di layar.</p>
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Upload Section */}
-          <div className="w-full lg:w-1/3 bg-gray-50 dark:bg-gray-850 p-4 rounded-xl border border-gray-200 dark:border-gray-800 flex flex-col gap-4 self-start">
+          <div className="w-full lg:w-1/3 bg-gray-50 dark:bg-gray-855 p-4 rounded-xl border border-gray-200 dark:border-gray-800 flex flex-col gap-4 self-start">
             <h3 className="font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2 border-b dark:border-gray-800 pb-2">
               <Upload size={18} className="text-[#2D5A27]" /> Upload Slider Baru
             </h3>
             
             <div>
-              <label className="block text-xs font-bold text-gray-600 dark:text-gray-450 mb-1">Pilih File Gambar</label>
+              <label className="block text-xs font-bold text-gray-650 dark:text-gray-405 mb-1">Pilih File Gambar</label>
               <input 
                 type="file" 
                 id="slider-upload"
@@ -63,11 +70,20 @@ const KelolaMedia = () => {
             
             {previewUrl && (
               <div className="relative">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-semibold">Pratinjau Gambar:</p>
-                <div className="relative h-40 rounded-lg overflow-hidden border dark:border-gray-800">
-                  <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                <p className="text-xs text-gray-505 dark:text-gray-400 mb-1 font-semibold">Pratinjau Gambar:</p>
+                <div className="relative h-40 rounded-lg overflow-hidden border dark:border-gray-800 bg-gray-900 flex items-center justify-center">
+                  <img 
+                    src={previewUrl} 
+                    alt="Preview" 
+                    className={`w-full h-full object-cover ${
+                      newAlign === 'top' ? 'object-top' :
+                      newAlign === 'bottom' ? 'object-bottom' :
+                      newAlign === 'left' ? 'object-left' :
+                      newAlign === 'right' ? 'object-right' : 'object-center'
+                    }`} 
+                  />
                   {isUploading && (
-                    <div className="absolute inset-0 bg-black/45 flex items-center justify-center text-xs text-white font-bold">
+                    <div className="absolute inset-0 bg-black/45 flex items-center justify-center text-xs text-white font-bold animate-pulse">
                       Mengunggah ke Cloudinary...
                     </div>
                   )}
@@ -76,7 +92,22 @@ const KelolaMedia = () => {
             )}
 
             <div>
-              <label className="block text-xs font-bold text-gray-650 dark:text-gray-400 mb-1">Judul Slide (Opsional)</label>
+              <label className="block text-xs font-bold text-gray-650 dark:text-gray-405 mb-1 font-semibold">Focal Point (Bagian yang Ditampilkan)</label>
+              <select
+                value={newAlign}
+                onChange={(e) => setNewAlign(e.target.value)}
+                className="w-full p-2 border dark:border-gray-750 bg-white dark:bg-gray-800 dark:text-white text-xs rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none"
+              >
+                <option value="top">Atas (Top)</option>
+                <option value="center">Tengah (Center)</option>
+                <option value="bottom">Bawah (Bottom)</option>
+                <option value="left">Kiri (Left)</option>
+                <option value="right">Kanan (Right)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-650 dark:text-gray-405 mb-1">Judul Slide (Opsional)</label>
               <input 
                 type="text" 
                 value={newTitle}
@@ -87,7 +118,7 @@ const KelolaMedia = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-655 dark:text-gray-400 mb-1">Subjudul Slide (Opsional)</label>
+              <label className="block text-xs font-bold text-gray-655 dark:text-gray-405 mb-1">Subjudul Slide (Opsional)</label>
               <textarea 
                 value={newSubtitle}
                 onChange={(e) => setNewSubtitle(e.target.value)}
@@ -99,8 +130,8 @@ const KelolaMedia = () => {
             <button 
               onClick={handleAddSlider}
               disabled={!previewUrl || isUploading}
-              className={`w-full py-2 rounded-lg font-medium text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                previewUrl && !isUploading ? 'bg-[#2D5A27] text-white hover:bg-green-700' : 'bg-gray-200 dark:bg-gray-800 text-gray-450 dark:text-gray-500'
+              className={`w-full py-2 rounded-lg font-bold text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                previewUrl && !isUploading ? 'bg-[#2D5A27] text-white hover:bg-green-700 shadow-sm' : 'bg-gray-200 dark:bg-gray-800 text-gray-450 dark:text-gray-500'
               }`}
             >
               {isUploading ? 'Mengunggah...' : 'Tambahkan ke Slider'}
@@ -120,14 +151,23 @@ const KelolaMedia = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {sliderImages.map((img, index) => (
-                  <div key={img.id} className="bg-white dark:bg-gray-850 rounded-xl overflow-hidden border border-gray-150 dark:border-gray-800 shadow-sm flex flex-col">
+                  <div key={img.id} className="bg-white dark:bg-gray-850 rounded-xl overflow-hidden border border-gray-150 dark:border-gray-800 shadow-sm flex flex-col justify-between">
                     {/* Image Area with delete button on hover */}
-                    <div className="relative group h-40">
-                      <img src={img.url} alt={`Slider ${index}`} className="w-full h-full object-cover" />
+                    <div className="relative group h-40 bg-gray-900 flex items-center justify-center">
+                      <img 
+                        src={img.url} 
+                        alt={`Slider ${index}`} 
+                        className={`w-full h-full object-cover ${
+                          img.align === 'top' ? 'object-top' :
+                          img.align === 'bottom' ? 'object-bottom' :
+                          img.align === 'left' ? 'object-left' :
+                          img.align === 'right' ? 'object-right' : 'object-center'
+                        }`} 
+                      />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <button 
                           onClick={() => handleDelete(img.id)}
-                          className="bg-red-650 hover:bg-red-750 text-white p-2 rounded-full transform hover:scale-110 transition-all cursor-pointer shadow-md"
+                          className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transform hover:scale-110 transition-all cursor-pointer shadow-md"
                           title="Hapus gambar"
                         >
                           <Trash2 size={18} />
@@ -138,8 +178,9 @@ const KelolaMedia = () => {
                       </span>
                     </div>
                     {/* Text Inputs */}
-                    <div className="p-3 space-y-2 flex-grow bg-gray-50/50 dark:bg-gray-900/40 border-t dark:border-gray-800">
+                    <div className="p-3 space-y-2.5 flex-grow bg-gray-50/50 dark:bg-gray-900/40 border-t dark:border-gray-800">
                       <div>
+                        <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">Judul Slide</label>
                         <input 
                           type="text" 
                           value={img.title || ''}
@@ -149,12 +190,27 @@ const KelolaMedia = () => {
                         />
                       </div>
                       <div>
+                        <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">Subjudul Slide</label>
                         <textarea 
                           value={img.subtitle || ''}
                           onChange={(e) => handleUpdateText(img.id, 'subtitle', e.target.value)}
                           placeholder="Subjudul khusus slide ini..."
                           className="w-full px-2 py-1 border dark:border-gray-750 bg-white dark:bg-gray-800 dark:text-white text-[11px] rounded-md focus:ring-1 focus:ring-[#2D5A27] outline-none h-12 resize-none"
                         />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">Focal Point (Arah Potong Gambar)</label>
+                        <select
+                          value={img.align || 'center'}
+                          onChange={(e) => handleUpdateAlign(img.id, e.target.value)}
+                          className="w-full px-2 py-1 border dark:border-gray-750 bg-white dark:bg-gray-800 dark:text-white text-[11px] rounded-md focus:ring-1 focus:ring-[#2D5A27] outline-none"
+                        >
+                          <option value="top">Atas (Top)</option>
+                          <option value="center">Tengah (Center)</option>
+                          <option value="bottom">Bawah (Bottom)</option>
+                          <option value="left">Kiri (Left)</option>
+                          <option value="right">Kanan (Right)</option>
+                        </select>
                       </div>
                     </div>
                   </div>

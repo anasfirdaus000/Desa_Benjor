@@ -17,19 +17,25 @@ const KelolaUMKM = () => {
     owner: '',
     wa: '',
     category: '',
+    align: 'center'
   });
 
   const handleOpenModal = (item: any = null) => {
     if (item) {
       setEditingId(item.id);
       setFormData({ 
-        name: item.name, price: item.price, description: item.description, 
-        owner: item.owner, wa: item.wa, category: item.category 
+        name: item.name, 
+        price: item.price, 
+        description: item.description, 
+        owner: item.owner, 
+        wa: item.wa, 
+        category: item.category,
+        align: item.align || 'center'
       });
       setPreviewUrl(item.image);
     } else {
       setEditingId(null);
-      setFormData({ name: '', price: 0, description: '', owner: '', wa: '', category: '' });
+      setFormData({ name: '', price: 0, description: '', owner: '', wa: '', category: '', align: 'center' });
       clearImage();
     }
     setIsModalOpen(true);
@@ -68,14 +74,14 @@ const KelolaUMKM = () => {
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-250 transition-colors duration-300">
-      <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-850/50 rounded-t-xl">
+      <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-55 dark:bg-gray-850/50 rounded-t-xl">
         <div>
           <h2 className="text-xl font-bold text-gray-800 dark:text-white">Kelola Produk UMKM</h2>
           <p className="text-sm text-gray-505 dark:text-gray-400">Daftar produk ekonomi kreatif warga Desa Benjor.</p>
         </div>
         <button 
           onClick={() => handleOpenModal()}
-          className="bg-[#2D5A27] hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm font-medium cursor-pointer"
+          className="bg-[#2D5A27] hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm font-semibold cursor-pointer shadow-sm"
         >
           <Plus size={18} /> Tambah Produk
         </button>
@@ -85,11 +91,12 @@ const KelolaUMKM = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50 dark:bg-gray-855 text-gray-600 dark:text-gray-300 text-sm border-b dark:border-gray-800">
+              <tr className="bg-gray-50 dark:bg-gray-855 text-gray-650 dark:text-gray-305 text-sm border-b dark:border-gray-800">
                 <th className="p-4 font-medium">Foto</th>
                 <th className="p-4 font-medium">Nama Produk</th>
                 <th className="p-4 font-medium">Harga</th>
                 <th className="p-4 font-medium">Pemilik</th>
+                <th className="p-4 font-medium">Focal Point</th>
                 <th className="p-4 font-medium">Aksi</th>
               </tr>
             </thead>
@@ -97,7 +104,14 @@ const KelolaUMKM = () => {
               {umkm.map(product => (
                 <tr key={product.id} className="border-b dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-850/30 transition-colors">
                   <td className="p-4">
-                    <img src={product.image} alt={product.name} className="w-16 h-16 rounded-xl object-cover border dark:border-gray-800" />
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                      className={`w-16 h-16 rounded-xl object-cover border dark:border-gray-800 ${
+                        product.align === 'top' ? 'object-top' :
+                        product.align === 'bottom' ? 'object-bottom' : 'object-center'
+                      }`} 
+                    />
                   </td>
                   <td className="p-4">
                     <div className="font-bold text-gray-850 dark:text-white line-clamp-1">{product.name}</div>
@@ -109,6 +123,9 @@ const KelolaUMKM = () => {
                   <td className="p-4 text-sm text-gray-650 dark:text-gray-400">
                     <div>{product.owner}</div>
                     <div className="text-xs text-gray-400">{product.wa}</div>
+                  </td>
+                  <td className="p-4 text-xs font-semibold text-gray-500 dark:text-gray-450 uppercase">
+                    {product.align || 'center'}
                   </td>
                   <td className="p-4">
                     <div className="flex gap-2">
@@ -124,13 +141,13 @@ const KelolaUMKM = () => {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/55 dark:bg-black/75 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black/60 dark:bg-black/75 flex items-center justify-center z-50 p-4 backdrop-blur-xs">
           <div className="bg-white dark:bg-gray-900 rounded-xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border dark:border-gray-800">
-            <div className="p-4 border-b dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-850">
-              <h3 className="font-bold text-lg text-gray-900 dark:text-white">{editingId ? 'Edit Produk' : 'Tambah Produk'}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800 p-1.5 rounded-full cursor-pointer"><X size={20} /></button>
+            <div className="p-4 border-b dark:border-gray-800 flex justify-between items-center bg-gray-55 dark:bg-gray-850">
+              <h3 className="font-bold text-base text-gray-900 dark:text-white">{editingId ? 'Edit Produk' : 'Tambah Produk'}</h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 p-1.5 rounded-full cursor-pointer"><X size={20} /></button>
             </div>
-            <div className="p-4 overflow-y-auto text-gray-800 dark:text-gray-250">
+            <div className="p-5 overflow-y-auto text-gray-800 dark:text-gray-250">
               <form id="umkm-form" onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -157,16 +174,31 @@ const KelolaUMKM = () => {
                   </div>
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-305 mb-1 font-semibold">Focal Point (Posisi Fokus Foto)</label>
+                  <select value={formData.align} onChange={e => setFormData({...formData, align: e.target.value})} className="w-full p-2 border dark:border-gray-750 bg-white dark:bg-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none">
+                    <option value="top">Atas (Top)</option>
+                    <option value="center">Tengah (Center)</option>
+                    <option value="bottom">Bawah (Bottom)</option>
+                  </select>
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-305 mb-1">Deskripsi Singkat</label>
                   <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full p-2 border dark:border-gray-750 bg-white dark:bg-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none h-20" required></textarea>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Foto Produk</label>
-                  <input type="file" accept="image/*" onChange={handleImageChange} className="w-full p-2 border dark:border-gray-750 bg-gray-50 dark:bg-gray-850 rounded-lg dark:text-gray-300 cursor-pointer" />
+                  <input type="file" accept="image/*" onChange={handleImageChange} className="w-full p-2 border dark:border-gray-750 bg-gray-55 dark:bg-gray-850 rounded-lg dark:text-gray-300 cursor-pointer" />
                   
                   {previewUrl && (
-                    <div className="relative mt-2">
-                      <img src={previewUrl} alt="Preview" className="h-32 w-full object-cover rounded border dark:border-gray-800" />
+                    <div className="relative mt-2 bg-gray-900 rounded overflow-hidden flex items-center justify-center">
+                      <img 
+                        src={previewUrl} 
+                        alt="Preview" 
+                        className={`h-32 w-full object-cover rounded border dark:border-gray-800 ${
+                          formData.align === 'top' ? 'object-top' :
+                          formData.align === 'bottom' ? 'object-bottom' : 'object-center'
+                        }`} 
+                      />
                       {isUploading && (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-xs text-white font-bold rounded">
                           Mengunggah ke Cloudinary...
@@ -177,9 +209,9 @@ const KelolaUMKM = () => {
                 </div>
               </form>
             </div>
-            <div className="p-4 border-t dark:border-gray-800 bg-gray-55 dark:bg-gray-850 flex justify-end gap-2">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-650 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors cursor-pointer">Batal</button>
-              <button type="submit" form="umkm-form" disabled={isUploading} className="px-4 py-2 bg-[#2D5A27] hover:bg-green-700 text-white rounded-lg font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+            <div className="p-4 border-t dark:border-gray-800 bg-gray-50 dark:bg-gray-850 flex justify-end gap-2">
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-655 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors cursor-pointer text-xs">Batal</button>
+              <button type="submit" form="umkm-form" disabled={isUploading} className="px-5 py-2 bg-[#2D5A27] hover:bg-green-700 text-white rounded-lg font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-xs shadow-sm">
                 {isUploading ? 'Mengunggah...' : 'Simpan'}
               </button>
             </div>

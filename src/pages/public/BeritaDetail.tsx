@@ -44,7 +44,12 @@ const BeritaDetail = () => {
             <img 
               src={allImages[currentIdx]} 
               alt={`${article.title} - Foto ${currentIdx + 1}`} 
-              className="w-full h-full object-contain bg-gray-950 transition-all duration-700 ease-in-out"
+              className={`w-full h-full object-cover transition-all duration-700 ease-in-out ${
+                currentIdx === 0 && article.align
+                  ? article.align === 'top' ? 'object-top' :
+                    article.align === 'bottom' ? 'object-bottom' : 'object-center'
+                  : 'object-center'
+              }`}
             />
             
             {allImages.length > 1 && (

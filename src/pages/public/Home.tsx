@@ -188,7 +188,12 @@ const Home = () => {
                   initial={{ scale: 1.02 }}
                   animate={{ scale: 1.05 }}
                   transition={{ duration: 6, ease: "easeOut" }}
-                  className="object-contain w-full h-full bg-[#122610]"
+                  className={`w-full h-full object-cover ${
+                    img.align === 'top' ? 'object-top' :
+                    img.align === 'bottom' ? 'object-bottom' :
+                    img.align === 'left' ? 'object-left' :
+                    img.align === 'right' ? 'object-right' : 'object-center'
+                  }`}
                 />
               </motion.div>
             )
@@ -406,7 +411,10 @@ const Home = () => {
                       <img 
                         src={product.image} 
                         alt={product.name} 
-                        className="w-full h-full object-contain bg-[#f9fafb] p-2 dark:bg-gray-800/40"
+                        className={`w-full h-full object-cover ${
+                          product.align === 'top' ? 'object-top' :
+                          product.align === 'bottom' ? 'object-bottom' : 'object-center'
+                        }`}
                       />
                       <div className="absolute top-3 right-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-2.5 py-1 rounded-md text-xxs font-bold text-[#2D5A27] dark:text-green-450 shadow-sm border dark:border-gray-800">
                         {product.category}
@@ -499,7 +507,10 @@ const Home = () => {
                     <img 
                       src={product.image} 
                       alt={product.name} 
-                      className="w-full h-full object-contain bg-[#f9fafb] p-2 dark:bg-gray-800/40"
+                      className={`w-full h-full object-cover ${
+                        product.align === 'top' ? 'object-top' :
+                        product.align === 'bottom' ? 'object-bottom' : 'object-center'
+                      }`}
                     />
                     <div className="absolute top-2 right-2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-bold text-[#2D5A27] dark:text-green-450 shadow-sm border dark:border-gray-800">
                       {product.category}
@@ -564,7 +575,14 @@ const Home = () => {
               className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800/80 hover:shadow-lg transition-all duration-300 group flex flex-col h-full cursor-pointer"
             >
               <div className="h-52 overflow-hidden relative bg-[#f9fafb] dark:bg-gray-800/40">
-                <img src={item.image} alt={item.title} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500" />
+                <img 
+                  src={item.image} 
+                  alt={item.title} 
+                  className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${
+                    item.align === 'top' ? 'object-top' :
+                    item.align === 'bottom' ? 'object-bottom' : 'object-center'
+                  }`} 
+                />
                 <span className="absolute top-4 left-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm text-[#2D5A27] dark:text-green-400 text-xs font-bold px-3 py-1.5 rounded-md shadow-sm border dark:border-gray-800">
                   {item.category}
                 </span>
@@ -628,7 +646,14 @@ const Home = () => {
                 }}
                 className="relative h-56 rounded-2xl overflow-hidden group shadow-md border border-gray-150 dark:border-gray-800/80 cursor-pointer"
               >
-                <img src={spot.image} alt={spot.title} className="w-full h-full object-contain p-2 bg-gray-50/50 dark:bg-gray-800/40 group-hover:scale-105 transition-transform duration-700" />
+                <img 
+                  src={spot.image} 
+                  alt={spot.title} 
+                  className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${
+                    spot.align === 'top' ? 'object-top' :
+                    spot.align === 'bottom' ? 'object-bottom' : 'object-center'
+                  }`} 
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-5">
                   <p className="text-white text-sm font-semibold tracking-wide leading-relaxed">
                     {spot.title}
@@ -691,7 +716,12 @@ const Home = () => {
                   <img 
                     src={activeWisataPhotos[activePhotoIdx]} 
                     alt={activeWisata.title} 
-                    className="w-full h-full object-contain bg-gray-100 dark:bg-gray-900 transition-all duration-300"
+                    className={`w-full h-full object-cover transition-all duration-300 ${
+                      activePhotoIdx === 0 && activeWisata.align
+                        ? activeWisata.align === 'top' ? 'object-top' :
+                          activeWisata.align === 'bottom' ? 'object-bottom' : 'object-center'
+                        : 'object-center'
+                    }`}
                   />
                   {/* Photo slides arrow navigation overlays */}
                   {activeWisataPhotos.length > 1 && (

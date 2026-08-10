@@ -12,6 +12,7 @@ const KelolaWisata = () => {
   const [formData, setFormData] = useState({
     title: '',
     desc: '',
+    align: 'center'
   });
 
   const [additionalPhotos, setAdditionalPhotos] = useState<string[]>([]);
@@ -42,13 +43,14 @@ const KelolaWisata = () => {
       setFormData({
         title: item.title,
         desc: item.desc || '',
+        align: item.align || 'center'
       });
       setMainPreviewUrl(item.image);
       setAdditionalPhotos(item.photos || []);
       setSelectedComments(item.comments || []);
     } else {
       setEditingId(null);
-      setFormData({ title: '', desc: '' });
+      setFormData({ title: '', desc: '', align: 'center' });
       clearMainImage();
       setAdditionalPhotos([]);
       setSelectedComments([]);
@@ -92,6 +94,7 @@ const KelolaWisata = () => {
       image: mainPreviewUrl || '',
       photos: additionalPhotos,
       comments: selectedComments,
+      align: formData.align
     };
 
     if (editingId) {
@@ -114,14 +117,14 @@ const KelolaWisata = () => {
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-250 transition-colors duration-300">
-      <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-850/50 rounded-t-xl">
+      <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-55 dark:bg-gray-850/50 rounded-t-xl">
         <div>
           <h2 className="text-xl font-bold text-gray-800 dark:text-white">Kelola Wisata Desa Benjor</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">Daftar objek wisata, galeri tambahan, dan ulasan pengunjung.</p>
         </div>
         <button 
           onClick={() => handleOpenModal()}
-          className="bg-[#2D5A27] hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm font-medium cursor-pointer"
+          className="bg-[#2D5A27] hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm font-semibold cursor-pointer shadow-sm"
         >
           <Plus size={18} /> Tambah Destinasi
         </button>
@@ -131,19 +134,27 @@ const KelolaWisata = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50 dark:bg-gray-855 text-gray-600 dark:text-gray-300 text-sm border-b dark:border-gray-800">
+              <tr className="bg-gray-50 dark:bg-gray-855 text-gray-650 dark:text-gray-305 text-sm border-b dark:border-gray-800">
                 <th className="p-4 font-medium">Foto Utama</th>
                 <th className="p-4 font-medium">Nama Wisata</th>
                 <th className="p-4 font-medium">Jumlah Foto Galeri</th>
                 <th className="p-4 font-medium">Komentar</th>
+                <th className="p-4 font-medium">Focal Point</th>
                 <th className="p-4 font-medium">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {wisata.map(spot => (
-                <tr key={spot.id} className="border-b dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-850/30 transition-colors">
+                <tr key={spot.id} className="border-b dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-855/30 transition-colors">
                   <td className="p-4">
-                    <img src={spot.image} alt={spot.title} className="w-20 h-14 rounded-lg object-cover border dark:border-gray-800" />
+                    <img 
+                      src={spot.image} 
+                      alt={spot.title} 
+                      className={`w-20 h-14 rounded-lg object-cover border dark:border-gray-800 bg-gray-900 ${
+                        spot.align === 'top' ? 'object-top' :
+                        spot.align === 'bottom' ? 'object-bottom' : 'object-center'
+                      }`} 
+                    />
                   </td>
                   <td className="p-4">
                     <h4 className="font-bold text-gray-900 dark:text-white">{spot.title}</h4>
@@ -155,25 +166,20 @@ const KelolaWisata = () => {
                   <td className="p-4 text-sm font-medium text-gray-600 dark:text-gray-400">
                     {(spot.comments || []).length} Ulasan
                   </td>
-                  <td className="p-4 flex gap-2 h-20 items-center">
-                    <button 
-                      onClick={() => handleOpenModal(spot)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors cursor-pointer"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(spot.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors cursor-pointer"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                  <td className="p-4 text-xs font-semibold text-gray-500 dark:text-gray-450 uppercase">
+                    {spot.align || 'center'}
+                  </td>
+                  <td className="p-4">
+                    <div className="flex gap-2">
+                      <button onClick={() => handleOpenModal(spot)} className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors cursor-pointer"><Edit2 size={16} /></button>
+                      <button onClick={() => handleDelete(spot.id)} className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors cursor-pointer"><Trash2 size={16} /></button>
+                    </div>
                   </td>
                 </tr>
               ))}
               {wisata.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan={6} className="p-8 text-center text-gray-500 dark:text-gray-400">
                     Belum ada destinasi wisata yang terdaftar.
                   </td>
                 </tr>
@@ -188,10 +194,10 @@ const KelolaWisata = () => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden border dark:border-gray-800 flex flex-col max-h-[90vh]">
             <div className="p-5 border-b dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-850/50">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">
                 {editingId ? 'Edit Destinasi Wisata' : 'Tambah Destinasi Wisata'}
               </h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-450 hover:text-gray-600 dark:hover:text-gray-300">
                 <X size={20} />
               </button>
             </div>
@@ -230,11 +236,11 @@ const KelolaWisata = () => {
             )}
 
             <form onSubmit={handleSubmit} className="flex-grow flex flex-col overflow-hidden">
-              <div className="p-6 space-y-4 overflow-y-auto flex-grow">
+              <div className="p-6 space-y-4 overflow-y-auto flex-grow text-gray-800 dark:text-gray-250">
                 {activeTab === 'info' && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Wisata</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-305 mb-1">Nama Wisata</label>
                       <input 
                         type="text" 
                         value={formData.title} 
@@ -246,7 +252,16 @@ const KelolaWisata = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deskripsi</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-305 mb-1">Focal Point Foto Utama (Fokus Foto)</label>
+                      <select value={formData.align} onChange={(e) => setFormData({...formData, align: e.target.value})} className="w-full p-2.5 border dark:border-gray-750 bg-white dark:bg-gray-800 text-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none">
+                        <option value="top">Atas (Top)</option>
+                        <option value="center">Tengah (Center)</option>
+                        <option value="bottom">Bawah (Bottom)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-305 mb-1">Deskripsi</label>
                       <textarea 
                         value={formData.desc} 
                         onChange={(e) => setFormData({...formData, desc: e.target.value})}
@@ -260,12 +275,19 @@ const KelolaWisata = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Foto Utama</label>
                       {mainPreviewUrl ? (
-                        <div className="relative w-full h-44 rounded-xl overflow-hidden group border dark:border-gray-800">
-                          <img src={mainPreviewUrl} alt="Preview" className="w-full h-full object-cover" />
+                        <div className="relative w-full h-44 rounded-xl overflow-hidden group border dark:border-gray-800 bg-gray-900 flex items-center justify-center">
+                          <img 
+                            src={mainPreviewUrl} 
+                            alt="Preview" 
+                            className={`w-full h-full object-cover ${
+                              formData.align === 'top' ? 'object-top' :
+                              formData.align === 'bottom' ? 'object-bottom' : 'object-center'
+                            }`} 
+                          />
                           <button 
                             type="button"
                             onClick={clearMainImage}
-                            className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-full shadow transition-all cursor-pointer"
+                            className="absolute top-2 right-2 bg-red-650 hover:bg-red-750 text-white p-1.5 rounded-full shadow transition-all cursor-pointer"
                           >
                             <X size={16} />
                           </button>
@@ -273,7 +295,7 @@ const KelolaWisata = () => {
                       ) : (
                         <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-8 flex flex-col items-center justify-center hover:border-[#2D5A27] transition-colors bg-gray-50 dark:bg-gray-850">
                           <ImageIcon size={32} className="text-gray-400 mb-2" />
-                          <label className="bg-white dark:bg-gray-800 border dark:border-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer font-medium">
+                          <label className="bg-white dark:bg-gray-800 border dark:border-gray-700 text-gray-700 dark:text-gray-305 px-4 py-2 rounded-lg text-sm shadow-sm hover:bg-gray-55 dark:hover:bg-gray-700 cursor-pointer font-medium">
                             Upload Foto
                             <input 
                               type="file" 
@@ -298,7 +320,7 @@ const KelolaWisata = () => {
                       
                       {addPreviewUrl ? (
                         <div className="space-y-3">
-                          <div className="relative w-40 h-28 rounded-lg overflow-hidden border dark:border-gray-800">
+                          <div className="relative w-40 h-28 rounded-lg overflow-hidden border dark:border-gray-800 bg-gray-900 flex items-center justify-center">
                             <img src={addPreviewUrl} alt="Preview tambahan" className="w-full h-full object-cover" />
                             <button 
                               type="button"
@@ -311,14 +333,14 @@ const KelolaWisata = () => {
                           <button
                             type="button"
                             onClick={handleAddAdditionalPhoto}
-                            className="bg-[#2D5A27] hover:bg-green-750 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                            className="bg-[#2D5A27] hover:bg-green-755 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
                           >
                             Tambahkan ke Galeri
                           </button>
                         </div>
                       ) : (
                         <div className="flex items-center gap-3">
-                          <label className="bg-white dark:bg-gray-800 border dark:border-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-xs shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer font-bold">
+                          <label className="bg-white dark:bg-gray-800 border dark:border-gray-700 text-gray-700 dark:text-gray-305 px-4 py-2 rounded-lg text-xs shadow-sm hover:bg-gray-55 dark:hover:bg-gray-700 cursor-pointer font-bold">
                             Pilih Foto Tambahan
                             <input 
                               type="file" 
@@ -332,75 +354,70 @@ const KelolaWisata = () => {
                       )}
                     </div>
 
-                    {/* Current Additional Photos list */}
-                    <div>
-                      <p className="text-sm font-bold text-gray-700 dark:text-white mb-3">Koleksi Foto Galeri ({additionalPhotos.length})</p>
-                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                        {additionalPhotos.map((photo, idx) => (
-                          <div key={idx} className="relative h-20 rounded-lg overflow-hidden group border dark:border-gray-800">
-                            <img src={photo} alt="" className="w-full h-full object-cover" />
+                    <h4 className="font-semibold text-sm border-b dark:border-gray-800 pb-1 flex items-center gap-1.5"><ImageIcon size={16} /> Galeri Foto Destinasi ({(additionalPhotos || []).length})</h4>
+                    
+                    {additionalPhotos.length === 0 ? (
+                      <p className="text-xs text-gray-500 italic py-4 text-center">Belum ada foto tambahan.</p>
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        {additionalPhotos.map((photo, index) => (
+                          <div key={index} className="relative group rounded-lg overflow-hidden border dark:border-gray-800 h-24">
+                            <img src={photo} alt={`Galeri ${index}`} className="w-full h-full object-cover" />
                             <button 
                               type="button"
-                              onClick={() => handleRemoveAdditionalPhoto(idx)}
-                              className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full opacity-90 hover:opacity-100 shadow transition-opacity cursor-pointer"
+                              onClick={() => handleRemoveAdditionalPhoto(index)}
+                              className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full shadow cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
                             >
-                              <X size={10} />
+                              <X size={12} />
                             </button>
                           </div>
                         ))}
-                        {additionalPhotos.length === 0 && (
-                          <p className="text-xs text-gray-500 col-span-3">Belum ada foto tambahan.</p>
-                        )}
                       </div>
-                    </div>
+                    )}
                   </div>
                 )}
 
                 {activeTab === 'comments' && (
                   <div className="space-y-4">
-                    <p className="text-sm font-bold text-gray-700 dark:text-white mb-1">Daftar Ulasan Pengunjung ({selectedComments.length})</p>
-                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
-                      {selectedComments.map((comment) => (
-                        <div key={comment.id} className="bg-gray-50 dark:bg-gray-850 p-3.5 rounded-xl border dark:border-gray-800 flex justify-between items-start gap-4">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-bold text-xs text-gray-850 dark:text-white">{comment.name}</span>
-                              <span className="text-[10px] text-gray-400 dark:text-gray-500">{comment.date}</span>
+                    <h4 className="font-semibold text-sm border-b dark:border-gray-800 pb-1 flex items-center gap-1.5">
+                      <MessageSquare size={16} /> Komentar Pengunjung ({selectedComments.length})
+                    </h4>
+                    
+                    {selectedComments.length === 0 ? (
+                      <p className="text-xs text-gray-500 italic py-4 text-center">Belum ada ulasan untuk destinasi ini.</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {selectedComments.map(c => (
+                          <div key={c.id} className="p-3 bg-gray-50 dark:bg-gray-850 rounded-xl border dark:border-gray-800 flex justify-between items-start gap-4">
+                            <div>
+                              <div className="text-xs font-bold text-gray-850 dark:text-white flex items-center gap-2">
+                                <span>{c.name}</span>
+                                <span className="text-[10px] text-gray-400 font-normal">{new Date(c.date).toLocaleDateString('id-ID')}</span>
+                              </div>
+                              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">{c.text}</p>
                             </div>
-                            <p className="text-xs text-gray-650 dark:text-gray-300 leading-relaxed">{comment.text}</p>
+                            <button 
+                              type="button" 
+                              onClick={() => handleDeleteComment(c.id)}
+                              className="text-red-500 hover:text-red-750 hover:bg-red-50 dark:hover:bg-red-950/40 p-1 rounded cursor-pointer transition-colors"
+                            >
+                              <Trash2 size={14} />
+                            </button>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteComment(comment.id)}
-                            className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors cursor-pointer"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      ))}
-                      {selectedComments.length === 0 && (
-                        <p className="text-xs text-gray-550 text-center py-6">Belum ada komentar untuk destinasi wisata ini.</p>
-                      )}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
 
-              <div className="p-5 border-t dark:border-gray-800 flex justify-end gap-3 bg-gray-50/50 dark:bg-gray-850/50">
-                <button 
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-sm font-medium transition-colors cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button 
-                  type="submit"
-                  disabled={isMainUploading || isAddUploading}
-                  className="bg-[#2D5A27] hover:bg-green-700 disabled:bg-gray-350 text-white px-5 py-2 rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow cursor-pointer"
-                >
-                  {isMainUploading || isAddUploading ? 'Mengunggah...' : 'Simpan Perubahan'}
-                </button>
+              <div className="p-4 border-t dark:border-gray-800 bg-gray-50 dark:bg-gray-850 flex justify-end gap-2">
+                <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-650 dark:text-gray-305 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors cursor-pointer text-xs">Tutup</button>
+                {activeTab === 'info' && (
+                  <button type="submit" disabled={isMainUploading || isAddUploading} className="px-5 py-2 bg-[#2D5A27] hover:bg-green-700 text-white rounded-lg font-bold transition-colors cursor-pointer text-xs shadow-sm">
+                    Simpan Perubahan
+                  </button>
+                )}
               </div>
             </form>
           </div>

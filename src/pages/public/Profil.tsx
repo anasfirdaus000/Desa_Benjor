@@ -15,7 +15,14 @@ const Profil = () => {
     return (
       <div className="flex flex-col items-center bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-all w-48 mx-auto">
         <div className="w-full h-48 bg-gray-200 dark:bg-gray-800">
-          <img src={item.image} alt={item.name} className="w-full h-full object-contain bg-gray-100 dark:bg-gray-800 p-1" />
+          <img 
+            src={item.image} 
+            alt={item.name} 
+            className={`w-full h-full object-cover ${
+              item.align === 'top' ? 'object-top' :
+              item.align === 'bottom' ? 'object-bottom' : 'object-center'
+            }`} 
+          />
         </div>
         <div className="w-full text-center">
           <div className="bg-[#2D5A27] dark:bg-gray-950 text-white font-bold py-2 px-2 text-sm uppercase tracking-wider">
