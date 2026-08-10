@@ -186,9 +186,9 @@ const Home = () => {
                   src={img.url} 
                   alt={`Slide ${index + 1}`} 
                   initial={{ scale: 1.02 }}
-                  animate={{ scale: 1.08 }}
+                  animate={{ scale: 1.05 }}
                   transition={{ duration: 6, ease: "easeOut" }}
-                  className="object-cover w-full h-full"
+                  className="object-contain w-full h-full bg-[#122610]"
                 />
               </motion.div>
             )
@@ -228,10 +228,10 @@ const Home = () => {
         </div>
 
         {/* Navigation buttons */}
-        <button onClick={prevSlide} className="absolute left-6 top-1/2 -translate-y-1/2 z-30 p-2.5 bg-black/20 hover:bg-[#2D5A27] rounded-full text-white backdrop-blur-sm transition-all duration-300 shadow-md">
+        <button onClick={prevSlide} className="hidden md:block absolute left-6 top-1/2 -translate-y-1/2 z-30 p-2.5 bg-black/20 hover:bg-[#2D5A27] rounded-full text-white backdrop-blur-sm transition-all duration-300 shadow-md">
           <ChevronLeft size={24} />
         </button>
-        <button onClick={nextSlide} className="absolute right-6 top-1/2 -translate-y-1/2 z-30 p-2.5 bg-black/20 hover:bg-[#2D5A27] rounded-full text-white backdrop-blur-sm transition-all duration-300 shadow-md">
+        <button onClick={nextSlide} className="hidden md:block absolute right-6 top-1/2 -translate-y-1/2 z-30 p-2.5 bg-black/20 hover:bg-[#2D5A27] rounded-full text-white backdrop-blur-sm transition-all duration-300 shadow-md">
           <ChevronRight size={24} />
         </button>
 
@@ -262,7 +262,7 @@ const Home = () => {
             <img 
               src={villageInfo.headImage} 
               alt={villageInfo.headName} 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain bg-gray-50 dark:bg-gray-800 p-1.5"
             />
           </motion.div>
           <div className="flex-1 text-center md:text-left">
@@ -290,15 +290,15 @@ const Home = () => {
         style={{ backgroundImage: `url('${villageInfo.statsBg || 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80'}')` }}
       >
         {/* Soft background overlay for text readability */}
-        <div className="absolute inset-0 bg-white/85 dark:bg-gray-950/85 md:bg-white/45 md:dark:bg-gray-950/55 z-0" />
+        <div className="absolute inset-0 bg-white/30 dark:bg-gray-950/40 md:bg-white/45 md:dark:bg-gray-950/55 z-0" />
         
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-[#2D5A27] dark:text-green-400 font-bold text-sm tracking-wider uppercase bg-white/80 dark:bg-gray-900/80 px-3 py-1.5 rounded-lg border border-green-100/30 dark:border-gray-800 shadow-sm backdrop-blur-sm">Statistik Kependudukan</span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mt-4 mb-4 tracking-tight drop-shadow-sm">
+          <div className="text-center max-w-3xl mx-auto mb-16 bg-white/90 dark:bg-gray-900/90 p-8 rounded-3xl border border-white/30 dark:border-gray-800/60 backdrop-blur-md shadow-md">
+            <span className="text-[#2D5A27] dark:text-green-400 font-bold text-sm tracking-wider uppercase bg-green-50 dark:bg-green-950/40 px-3 py-1.5 rounded-lg border border-green-150/30 dark:border-green-800 shadow-xs inline-block mb-3">Statistik Kependudukan</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mt-2 mb-4 tracking-tight">
               Administrasi Penduduk
             </h2>
-            <p className="text-gray-800 dark:text-gray-200 text-base leading-relaxed font-semibold bg-white/70 dark:bg-gray-900/70 px-6 py-3 rounded-2xl backdrop-blur-sm border border-white/20 dark:border-gray-800/40 shadow-sm">
+            <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed">
               Sistem pengelolaan data kependudukan digital untuk memberikan pelayanan publik yang efektif, efisien, dan transparan bagi seluruh warga Desa Benjor.
             </p>
           </div>
@@ -406,7 +406,7 @@ const Home = () => {
                       <img 
                         src={product.image} 
                         alt={product.name} 
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain bg-[#f9fafb] p-2 dark:bg-gray-800/40"
                       />
                       <div className="absolute top-3 right-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-2.5 py-1 rounded-md text-xxs font-bold text-[#2D5A27] dark:text-green-450 shadow-sm border dark:border-gray-800">
                         {product.category}
@@ -499,7 +499,7 @@ const Home = () => {
                     <img 
                       src={product.image} 
                       alt={product.name} 
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain bg-[#f9fafb] p-2 dark:bg-gray-800/40"
                     />
                     <div className="absolute top-2 right-2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-bold text-[#2D5A27] dark:text-green-450 shadow-sm border dark:border-gray-800">
                       {product.category}
@@ -563,8 +563,8 @@ const Home = () => {
               whileHover={{ y: -8, scale: 1.01 }}
               className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800/80 hover:shadow-lg transition-all duration-300 group flex flex-col h-full cursor-pointer"
             >
-              <div className="h-52 overflow-hidden relative">
-                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="h-52 overflow-hidden relative bg-[#f9fafb] dark:bg-gray-800/40">
+                <img src={item.image} alt={item.title} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500" />
                 <span className="absolute top-4 left-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm text-[#2D5A27] dark:text-green-400 text-xs font-bold px-3 py-1.5 rounded-md shadow-sm border dark:border-gray-800">
                   {item.category}
                 </span>
@@ -595,16 +595,16 @@ const Home = () => {
         style={{ backgroundImage: `url('${villageInfo.wisataBg || 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=1920&q=80'}')` }}
       >
         {/* Soft background overlay */}
-        <div className="absolute inset-0 bg-white/85 dark:bg-gray-950/85 md:bg-white/45 md:dark:bg-gray-950/55 z-0" />
+        <div className="absolute inset-0 bg-white/30 dark:bg-gray-950/40 md:bg-white/45 md:dark:bg-gray-950/55 z-0" />
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-16">
-            <div className="text-center md:text-left mb-6 md:mb-0 max-w-2xl bg-white/75 dark:bg-gray-900/75 p-6 rounded-2xl backdrop-blur-sm border border-white/20 dark:border-gray-800/40 shadow-sm">
-              <span className="text-[#2D5A27] dark:text-green-400 font-bold text-sm tracking-wider uppercase bg-white/80 dark:bg-gray-900/80 px-3 py-1.5 rounded-lg border border-green-100/30 dark:border-gray-800 shadow-sm inline-block mb-3">Pesona Wisata</span>
-              <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mt-2 mb-4 tracking-tight drop-shadow-sm">
+            <div className="text-center md:text-left mb-6 md:mb-0 max-w-2xl bg-white/90 dark:bg-gray-900/90 p-8 rounded-3xl border border-white/30 dark:border-gray-800/60 backdrop-blur-md shadow-md">
+              <span className="text-[#2D5A27] dark:text-green-400 font-bold text-sm tracking-wider uppercase bg-green-50 dark:bg-green-950/40 px-3 py-1.5 rounded-lg border border-green-150/30 dark:border-green-800 shadow-xs inline-block mb-3">Pesona Wisata</span>
+              <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mt-2 mb-4 tracking-tight">
                 Wisata Desa Benjor
               </h2>
-              <p className="text-gray-750 dark:text-gray-200 text-base leading-relaxed font-semibold">
+              <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed">
                 Menampilkan keindahan alam, destinasi wisata unggulan, dan keasrian lingkungan di Desa Benjor.
               </p>
             </div>
@@ -628,7 +628,7 @@ const Home = () => {
                 }}
                 className="relative h-56 rounded-2xl overflow-hidden group shadow-md border border-gray-150 dark:border-gray-800/80 cursor-pointer"
               >
-                <img src={spot.image} alt={spot.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                <img src={spot.image} alt={spot.title} className="w-full h-full object-contain p-2 bg-gray-50/50 dark:bg-gray-800/40 group-hover:scale-105 transition-transform duration-700" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-5">
                   <p className="text-white text-sm font-semibold tracking-wide leading-relaxed">
                     {spot.title}
@@ -735,7 +735,7 @@ const Home = () => {
                             : 'border-transparent opacity-65 hover:opacity-100'
                         }`}
                       >
-                        <img src={photo} alt="" className="w-full h-full object-cover" />
+                        <img src={photo} alt="" className="w-full h-full object-contain bg-gray-50 p-1 dark:bg-gray-850" />
                       </button>
                     ))}
                   </div>

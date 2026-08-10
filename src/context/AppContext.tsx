@@ -212,17 +212,59 @@ const getApiUrl = (path: string) => {
   return `${API_BASE}${path}`;
 };
 
+const getCachedState = <T,>(key: string, defaultValue: T): T => {
+  try {
+    const cached = localStorage.getItem(`cached_${key}`);
+    return cached ? JSON.parse(cached) : defaultValue;
+  } catch {
+    return defaultValue;
+  }
+};
+
 const AppContext = createContext<AppState | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [sliderImages, setSliderImages] = useState<SliderImage[]>(initialSliderImages);
-  const [sotk, setSotk] = useState<SOTK[]>(initialSOTK);
-  const [umkm, setUmkm] = useState<UMKM[]>(initialUMKM);
-  const [berita, setBerita] = useState<Berita[]>(initialBerita);
-  const [infografis, setInfografis] = useState<InfografisData>(initialInfografis);
-  const [villageInfo, setVillageInfo] = useState<VillageInfo>(initialVillageInfo);
-  const [adminProfile, setAdminProfile] = useState<AdminProfile>(initialAdminProfile);
-  const [wisata, setWisata] = useState<Wisata[]>(initialWisata);
+  const [sliderImages, setSliderImages] = useState<SliderImage[]>(() => getCachedState('slider_images', initialSliderImages));
+  const [sotk, setSotk] = useState<SOTK[]>(() => getCachedState('sotk', initialSOTK));
+  const [umkm, setUmkm] = useState<UMKM[]>(() => getCachedState('umkm', initialUMKM));
+  const [berita, setBerita] = useState<Berita[]>(() => getCachedState('berita', initialBerita));
+  const [infografis, setInfografis] = useState<InfografisData>(() => getCachedState('infografis', initialInfografis));
+  const [villageInfo, setVillageInfo] = useState<VillageInfo>(() => getCachedState('village_info', initialVillageInfo));
+  const [adminProfile, setAdminProfile] = useState<AdminProfile>(() => getCachedState('admin_profile', initialAdminProfile));
+  const [wisata, setWisata] = useState<Wisata[]>(() => getCachedState('wisata', initialWisata));
+
+  // Sync state updates automatically with localStorage cache
+  useEffect(() => {
+    localStorage.setItem('cached_slider_images', JSON.stringify(sliderImages));
+  }, [sliderImages]);
+
+  useEffect(() => {
+    localStorage.setItem('cached_sotk', JSON.stringify(sotk));
+  }, [sotk]);
+
+  useEffect(() => {
+    localStorage.setItem('cached_umkm', JSON.stringify(umkm));
+  }, [umkm]);
+
+  useEffect(() => {
+    localStorage.setItem('cached_berita', JSON.stringify(berita));
+  }, [berita]);
+
+  useEffect(() => {
+    localStorage.setItem('cached_infografis', JSON.stringify(infografis));
+  }, [infografis]);
+
+  useEffect(() => {
+    localStorage.setItem('cached_village_info', JSON.stringify(villageInfo));
+  }, [villageInfo]);
+
+  useEffect(() => {
+    localStorage.setItem('cached_admin_profile', JSON.stringify(adminProfile));
+  }, [adminProfile]);
+
+  useEffect(() => {
+    localStorage.setItem('cached_wisata', JSON.stringify(wisata));
+  }, [wisata]);
 
   const fetchWisata = async () => {
     try {

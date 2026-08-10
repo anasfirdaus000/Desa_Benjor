@@ -120,15 +120,21 @@ const PublicLayout = () => {
             {/* Shared Layout Logo */}
             <motion.div 
               layoutId="village-logo"
-              className="w-24 h-24 rounded-full bg-white text-[#2D5A27] flex items-center justify-center font-black text-5xl shadow-2xl mb-6 relative z-10 overflow-hidden"
-              initial={{ scale: 0.4, rotate: -180, opacity: 0 }}
-              animate={{ scale: 1, rotate: 0, opacity: 1 }}
+              className="flex items-center justify-center mb-6 relative z-10"
+              initial={{ scale: 0.4, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.2 }}
             >
               {villageInfo?.logoUrl ? (
-                <img src={villageInfo.logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
+                <img 
+                  src={villageInfo.logoUrl} 
+                  alt="Logo" 
+                  className="max-w-[220px] max-h-36 w-auto h-auto object-contain drop-shadow-2xl bg-white/10 p-2 rounded-2xl backdrop-blur-xs" 
+                />
               ) : (
-                "B"
+                <div className="w-24 h-24 rounded-full bg-white text-[#2D5A27] flex items-center justify-center font-black text-5xl shadow-2xl">
+                  B
+                </div>
               )}
             </motion.div>
             
@@ -169,14 +175,20 @@ const PublicLayout = () => {
                 <Link to="/" className="flex items-center gap-3">
                   <motion.div 
                     layoutId="village-logo"
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl transition-colors duration-300 overflow-hidden ${
-                      useTransparent ? 'bg-white text-[#2D5A27]' : 'bg-[#2D5A27] text-white'
-                    }`}
+                    className="flex items-center justify-center transition-colors duration-300"
                   >
                     {villageInfo?.logoUrl ? (
-                      <img src={villageInfo.logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
+                      <img 
+                        src={villageInfo.logoUrl} 
+                        alt="Logo" 
+                        className="max-w-[120px] max-h-11 w-auto h-auto object-contain" 
+                      />
                     ) : (
-                      "B"
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl transition-colors duration-300 ${
+                        useTransparent ? 'bg-white text-[#2D5A27]' : 'bg-[#2D5A27] text-white'
+                      }`}>
+                        B
+                      </div>
                     )}
                   </motion.div>
                   <div>
@@ -318,13 +330,17 @@ const PublicLayout = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div>
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#2D5A27] font-bold text-xl overflow-hidden">
-                  {villageInfo?.logoUrl ? (
-                    <img src={villageInfo.logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
-                  ) : (
-                    "B"
-                  )}
-                </div>
+                {villageInfo?.logoUrl ? (
+                  <img 
+                    src={villageInfo.logoUrl} 
+                    alt="Logo" 
+                    className="max-w-[120px] max-h-11 w-auto h-auto object-contain bg-white rounded p-1" 
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#2D5A27] font-bold text-xl">
+                    B
+                  </div>
+                )}
                 <h2 className="text-xl font-bold">Desa Benjor</h2>
               </div>
               <p className="text-gray-400 text-sm leading-relaxed">
