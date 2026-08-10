@@ -73,23 +73,8 @@ const Profil = () => {
               <span className="w-8 h-8 rounded bg-green-100 dark:bg-green-950/40 flex items-center justify-center text-lg">🗺️</span>
               Detail Geografis
             </h2>
-            <div className="prose max-w-none text-gray-750 dark:text-gray-300 leading-relaxed text-justify whitespace-pre-line mb-6">
+            <div className="prose max-w-none text-gray-750 dark:text-gray-300 leading-relaxed text-justify whitespace-pre-line">
               {villageInfo.geography}
-            </div>
-            
-            <div className="grid grid-cols-3 gap-4 border-t dark:border-gray-800 pt-6">
-              <div className="text-center p-3 bg-gray-50 dark:bg-gray-850 rounded-xl border dark:border-gray-800">
-                <span className="block text-[10px] sm:text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Luas Wilayah</span>
-                <span className="text-xs sm:text-base font-extrabold text-[#2D5A27] dark:text-green-400 mt-1 block">{villageInfo.stats?.area || '450 Ha'}</span>
-              </div>
-              <div className="text-center p-3 bg-gray-50 dark:bg-gray-850 rounded-xl border dark:border-gray-800">
-                <span className="block text-[10px] sm:text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Jumlah RT</span>
-                <span className="text-xs sm:text-base font-extrabold text-[#2D5A27] dark:text-green-400 mt-1 block">{villageInfo.stats?.rt || '15'}</span>
-              </div>
-              <div className="text-center p-3 bg-gray-50 dark:bg-gray-850 rounded-xl border dark:border-gray-800">
-                <span className="block text-[10px] sm:text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Jumlah RW</span>
-                <span className="text-xs sm:text-base font-extrabold text-[#2D5A27] dark:text-green-400 mt-1 block">{villageInfo.stats?.rw || '4'}</span>
-              </div>
             </div>
           </div>
         </div>

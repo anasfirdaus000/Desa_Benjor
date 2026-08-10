@@ -18,10 +18,6 @@ const KelolaPengaturan = () => {
     contactPhone: villageInfo.contact?.phone || '',
     facebook: villageInfo.socialMedia?.facebook || '',
     instagram: villageInfo.socialMedia?.instagram || '',
-    youtube: villageInfo.socialMedia?.youtube || '',
-    statsArea: villageInfo.stats?.area || '',
-    statsRt: villageInfo.stats?.rt || '',
-    statsRw: villageInfo.stats?.rw || '',
     heroTitle: villageInfo.heroTitle || '',
     heroSubtitle: villageInfo.heroSubtitle || '',
     footerDescription: villageInfo.footerDescription || '',
@@ -53,10 +49,6 @@ const KelolaPengaturan = () => {
         contactPhone: villageInfo.contact?.phone || '',
         facebook: villageInfo.socialMedia?.facebook || '',
         instagram: villageInfo.socialMedia?.instagram || '',
-        youtube: villageInfo.socialMedia?.youtube || '',
-        statsArea: villageInfo.stats?.area || '',
-        statsRt: villageInfo.stats?.rt || '',
-        statsRw: villageInfo.stats?.rw || '',
         heroTitle: villageInfo.heroTitle || '',
         heroSubtitle: villageInfo.heroSubtitle || '',
         footerDescription: villageInfo.footerDescription || '',
@@ -161,9 +153,9 @@ const KelolaPengaturan = () => {
         youtube: formData.youtube
       },
       stats: {
-        area: formData.statsArea,
-        rt: formData.statsRt,
-        rw: formData.statsRw,
+        area: villageInfo.stats?.area || '450 Ha',
+        rt: villageInfo.stats?.rt || '15',
+        rw: villageInfo.stats?.rw || '4',
         kk: formData.statsKk,
         sementara: formData.statsSementara,
         mutasi: formData.statsMutasi,
@@ -488,36 +480,6 @@ const KelolaPengaturan = () => {
         <div className="pt-6 border-t dark:border-gray-800">
           <h3 className="text-lg font-bold text-gray-700 dark:text-white mb-4 border-l-4 border-[#2D5A27] pl-3">Statistik Kependudukan (Angka)</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Luas Wilayah</label>
-              <input 
-                type="text" 
-                value={formData.statsArea} 
-                onChange={(e) => setFormData({...formData, statsArea: e.target.value})}
-                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Jumlah RT</label>
-              <input 
-                type="text" 
-                value={formData.statsRt} 
-                onChange={(e) => setFormData({...formData, statsRt: e.target.value})}
-                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Jumlah RW</label>
-              <input 
-                type="text" 
-                value={formData.statsRw} 
-                onChange={(e) => setFormData({...formData, statsRw: e.target.value})}
-                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
-                required
-              />
-            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Jumlah Kepala Keluarga</label>
               <input 

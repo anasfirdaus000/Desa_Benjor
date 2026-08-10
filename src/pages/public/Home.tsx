@@ -160,30 +160,6 @@ const Home = () => {
       unit: 'Jiwa',
       icon: '/tamang_files/mutasi-penduduk-_1rO7gmp.png',
       color: 'bg-red-55 dark:bg-red-950/40 text-red-600 dark:text-red-400'
-    },
-    {
-      id: 'area',
-      label: 'Luas Wilayah',
-      value: villageInfo.stats?.area || '450 Ha',
-      unit: '',
-      icon: Map,
-      color: 'bg-teal-50 dark:bg-teal-955/40 text-teal-600 dark:text-teal-400'
-    },
-    {
-      id: 'rt',
-      label: 'Jumlah RT',
-      value: villageInfo.stats?.rt || '15',
-      unit: 'RT',
-      icon: Landmark,
-      color: 'bg-indigo-50 dark:bg-indigo-955/40 text-indigo-600 dark:text-indigo-400'
-    },
-    {
-      id: 'rw',
-      label: 'Jumlah RW',
-      value: villageInfo.stats?.rw || '4',
-      unit: 'RW',
-      icon: Users,
-      color: 'bg-emerald-50 dark:bg-emerald-955/40 text-emerald-600 dark:text-emerald-400'
     }
   ];
 
@@ -327,23 +303,19 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-5">
             {demografiStats.map((stat, index) => (
               <motion.div 
                 key={stat.id} 
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.08 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
                 whileHover={{ y: -6, scale: 1.02 }}
                 className="bg-white/95 dark:bg-gray-900/95 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col items-center text-center cursor-pointer"
               >
-                <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4 p-2 bg-gray-50 dark:bg-gray-850 text-[#2D5A27] dark:text-green-400">
-                  {typeof stat.icon === 'string' ? (
-                    <img src={stat.icon} alt={stat.label} className="w-10 h-10 object-contain" />
-                  ) : (
-                    <stat.icon size={24} />
-                  )}
+                <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4 p-2 bg-gray-50 dark:bg-gray-850">
+                  <img src={stat.icon} alt={stat.label} className="w-10 h-10 object-contain" />
                 </div>
                 <h3 className="text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
                   {stat.label}
