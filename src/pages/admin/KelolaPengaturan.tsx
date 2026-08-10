@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
-import { Save } from 'lucide-react';
+import { Save, Upload, Image as ImageIcon, Globe, RefreshCw } from 'lucide-react';
 
 const KelolaPengaturan = () => {
   const { villageInfo, setVillageInfo, adminProfile, setAdminProfile } = useAppContext();
@@ -29,7 +29,13 @@ const KelolaPengaturan = () => {
     statsSementara: villageInfo.stats?.sementara || '',
     statsMutasi: villageInfo.stats?.mutasi || '',
     statsVisitors: villageInfo.stats?.visitors || '',
+    logoUrl: villageInfo.logoUrl || '',
+    faviconUrl: villageInfo.faviconUrl || '',
+    statsBg: villageInfo.statsBg || '',
+    wisataBg: villageInfo.wisataBg || '',
   });
+
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
 
   // Keep state in sync with context when loaded asynchronously
   useEffect(() => {
@@ -58,9 +64,43 @@ const KelolaPengaturan = () => {
         statsSementara: villageInfo.stats?.sementara || '',
         statsMutasi: villageInfo.stats?.mutasi || '',
         statsVisitors: villageInfo.stats?.visitors || '',
+        logoUrl: villageInfo.logoUrl || '',
+        faviconUrl: villageInfo.faviconUrl || '',
+        statsBg: villageInfo.statsBg || '',
+        wisataBg: villageInfo.wisataBg || '',
       });
     }
   }, [villageInfo, adminProfile]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingField(fieldName);
+    const apiData = new FormData();
+    apiData.append('file', file);
+
+    const API_BASE = import.meta.env.PROD ? '' : 'http://localhost:5000';
+
+    try {
+      const response = await fetch(`${API_BASE}/api/upload`, {
+        method: 'POST',
+        body: apiData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFormData(prev => ({ ...prev, [fieldName]: data.url }));
+        console.log(`${fieldName} uploaded:`, data.url);
+      } else {
+        alert('Gagal mengunggah gambar.');
+      }
+    } catch (err) {
+      alert('Gagal menghubungi server.');
+    } finally {
+      setUploadingField(null);
+    }
+  };
 
   const handleResetVisitors = async () => {
     if (!window.confirm('Yakin ingin meriset jumlah pengunjung website ke 0?')) return;
@@ -106,6 +146,10 @@ const KelolaPengaturan = () => {
       heroTitle: formData.heroTitle,
       heroSubtitle: formData.heroSubtitle,
       footerDescription: formData.footerDescription,
+      logoUrl: formData.logoUrl,
+      faviconUrl: formData.faviconUrl,
+      statsBg: formData.statsBg,
+      wisataBg: formData.wisataBg,
       contact: {
         address: formData.contactAddress,
         email: formData.contactEmail,
@@ -138,14 +182,126 @@ const KelolaPengaturan = () => {
       <div className="flex justify-between items-center mb-8 border-b dark:border-gray-800 pb-4">
         <div>
           <h2 className="text-xl font-bold text-gray-800 dark:text-white">Pengaturan Umum Website</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Update visi, misi, profil sejarah, kontak, dan tautan sosial media desa.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Update logo, favicon, visi, misi, latar belakang, kontak, dan tautan sosial media desa.</p>
         </div>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-6 max-w-4xl">
+      <form onSubmit={handleSave} className="space-y-8 max-w-4xl">
         
-        {/* Administrator Profile */}
+        {/* Visual & Media (Logo, Favicon, Backgrounds) */}
         <div>
+          <h3 className="text-lg font-bold text-gray-700 dark:text-white mb-4 border-l-4 border-[#2D5A27] pl-3 flex items-center gap-2">
+            <Globe size={18} /> Media & Tampilan Visual Website
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 dark:bg-gray-850 p-5 rounded-2xl border dark:border-gray-800">
+            {/* Logo Website */}
+            <div className="flex flex-col gap-2">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Logo Website (.png / .jpg)</label>
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full border bg-white dark:bg-gray-800 overflow-hidden flex items-center justify-center relative shadow-sm">
+                  {formData.logoUrl ? (
+                    <img src={formData.logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
+                  ) : (
+                    <span className="text-gray-400 font-bold text-lg">B</span>
+                  )}
+                  {uploadingField === 'logoUrl' && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] text-white">Uploading</div>
+                  )}
+                </div>
+                <div className="flex-grow">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => handleFileUpload(e, 'logoUrl')} 
+                    className="block w-full text-xs text-gray-505 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#2D5A27] file:text-white hover:file:bg-green-700 cursor-pointer"
+                  />
+                  <p className="text-[10px] text-gray-500 mt-1">Digunakan pada Navbar, Animasi Intro, dan Footer.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Favicon Website */}
+            <div className="flex flex-col gap-2">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Favicon Browser (.ico / .png)</label>
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded border bg-white dark:bg-gray-800 overflow-hidden flex items-center justify-center relative shadow-sm">
+                  {formData.faviconUrl ? (
+                    <img src={formData.faviconUrl} alt="Favicon" className="w-full h-full object-contain p-1" />
+                  ) : (
+                    <span className="text-gray-400 text-xs">Fav</span>
+                  )}
+                  {uploadingField === 'faviconUrl' && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-[8px] text-white">...</div>
+                  )}
+                </div>
+                <div className="flex-grow">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => handleFileUpload(e, 'faviconUrl')} 
+                    className="block w-full text-xs text-gray-550 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#2D5A27] file:text-white hover:file:bg-green-700 cursor-pointer"
+                  />
+                  <p className="text-[10px] text-gray-500 mt-1">Ikon tab browser web.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Background Statistik Kependudukan */}
+            <div className="flex flex-col gap-2 md:col-span-2 pt-2 border-t dark:border-gray-800">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-350">Latar Belakang (Background) Section 'Statistik Kependudukan'</label>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="w-full sm:w-40 h-24 rounded-lg border overflow-hidden bg-gray-100 dark:bg-gray-800 relative shadow-inner">
+                  {formData.statsBg ? (
+                    <img src={formData.statsBg} alt="Stats Background" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-400 text-xs">Belum ada foto</div>
+                  )}
+                  {uploadingField === 'statsBg' && (
+                    <div className="absolute inset-0 bg-black/45 flex items-center justify-center text-xs text-white font-bold">Mengunggah...</div>
+                  )}
+                </div>
+                <div className="flex-grow">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => handleFileUpload(e, 'statsBg')} 
+                    className="block w-full text-xs text-gray-550 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#2D5A27] file:text-white hover:file:bg-green-700 cursor-pointer"
+                  />
+                  <p className="text-[11px] text-gray-500 mt-1">Disarankan gambar beresolusi tinggi (min. 1920x1080 px). Gambar akan ditimpa efek overlay transparan demi kontras tulisan.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Background Pesona Wisata */}
+            <div className="flex flex-col gap-2 md:col-span-2 pt-2 border-t dark:border-gray-800">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-350">Latar Belakang (Background) Section 'Pesona Wisata'</label>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="w-full sm:w-40 h-24 rounded-lg border overflow-hidden bg-gray-100 dark:bg-gray-800 relative shadow-inner">
+                  {formData.wisataBg ? (
+                    <img src={formData.wisataBg} alt="Wisata Background" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-400 text-xs">Belum ada foto</div>
+                  )}
+                  {uploadingField === 'wisataBg' && (
+                    <div className="absolute inset-0 bg-black/45 flex items-center justify-center text-xs text-white font-bold">Mengunggah...</div>
+                  )}
+                </div>
+                <div className="flex-grow">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => handleFileUpload(e, 'wisataBg')} 
+                    className="block w-full text-xs text-gray-550 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#2D5A27] file:text-white hover:file:bg-green-700 cursor-pointer"
+                  />
+                  <p className="text-[11px] text-gray-500 mt-1">Disarankan gambar beresolusi tinggi (min. 1920x1080 px).</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Administrator Profile */}
+        <div className="pt-6 border-t dark:border-gray-800">
           <h3 className="text-lg font-bold text-gray-700 dark:text-white mb-4 border-l-4 border-[#2D5A27] pl-3">Profil Admin</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -176,21 +332,21 @@ const KelolaPengaturan = () => {
           <h3 className="text-lg font-bold text-gray-700 dark:text-white mb-4 border-l-4 border-[#2D5A27] pl-3">Hero Section & Footer</h3>
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Judul Hero (Selamat Datang...)</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Judul Hero Utama (Default - Muncul jika slide tidak memiliki judul)</label>
               <input 
                 type="text" 
                 value={formData.heroTitle} 
                 onChange={(e) => setFormData({...formData, heroTitle: e.target.value})}
-                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white"
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white font-medium"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Subjudul Hero (Mewujudkan tata kelola...)</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Subjudul Hero Utama (Default - Muncul jika slide tidak memiliki subjudul)</label>
               <textarea 
                 value={formData.heroSubtitle} 
                 onChange={(e) => setFormData({...formData, heroSubtitle: e.target.value})}
-                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white h-20"
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-855 dark:text-white h-20"
                 required
               />
             </div>
@@ -199,14 +355,14 @@ const KelolaPengaturan = () => {
               <textarea 
                 value={formData.footerDescription} 
                 onChange={(e) => setFormData({...formData, footerDescription: e.target.value})}
-                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white h-20"
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-855 dark:text-white h-20"
                 required
               />
             </div>
           </div>
         </div>
 
-        {/* Visi Misi & Sejarah */}
+        {/* Tentang Desa */}
         <div className="pt-6 border-t dark:border-gray-800">
           <h3 className="text-lg font-bold text-gray-700 dark:text-white mb-4 border-l-4 border-[#2D5A27] pl-3">Tentang Desa</h3>
           <div className="space-y-6">
@@ -250,126 +406,120 @@ const KelolaPengaturan = () => {
                 required
               />
             </div>
-          </div>
-        </div>
-
-        {/* Kontak & Media Sosial */}
-        <div className="pt-6 border-t dark:border-gray-800">
-          <h3 className="text-lg font-bold text-gray-700 dark:text-white mb-4 border-l-4 border-[#2D5A27] pl-3">Kontak & Media Sosial</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-355 mb-1">Alamat Kantor Desa</label>
-              <input 
-                type="text" 
-                value={formData.contactAddress} 
-                onChange={(e) => setFormData({...formData, contactAddress: e.target.value})}
-                className="w-full p-2.5 border dark:border-gray-755 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-355 mb-1">Email Desa</label>
-              <input 
-                type="email" 
-                value={formData.contactEmail} 
-                onChange={(e) => setFormData({...formData, contactEmail: e.target.value})}
-                className="w-full p-2.5 border dark:border-gray-755 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-355 mb-1">Telepon Desa</label>
-              <input 
-                type="text" 
-                value={formData.contactPhone} 
-                onChange={(e) => setFormData({...formData, contactPhone: e.target.value})}
-                className="w-full p-2.5 border dark:border-gray-755 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-855 dark:text-white"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Tautan Facebook</label>
-              <input 
-                type="text" 
-                value={formData.facebook} 
-                onChange={(e) => setFormData({...formData, facebook: e.target.value})}
-                className="w-full p-2.5 border dark:border-gray-755 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Tautan Instagram</label>
-              <input 
-                type="text" 
-                value={formData.instagram} 
-                onChange={(e) => setFormData({...formData, instagram: e.target.value})}
-                className="w-full p-2.5 border dark:border-gray-755 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Tautan Youtube</label>
-              <input 
-                type="text" 
-                value={formData.youtube} 
-                onChange={(e) => setFormData({...formData, youtube: e.target.value})}
-                className="w-full p-2.5 border dark:border-gray-755 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Peta & Statistik Fisik */}
-        <div className="pt-6 border-t dark:border-gray-800">
-          <h3 className="text-lg font-bold text-gray-700 dark:text-white mb-4 border-l-4 border-[#2D5A27] pl-3">Geografis, Statistik & Peta</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">URL Google Maps Embed Frame</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Link Google Maps (Iframe Src)</label>
               <input 
                 type="text" 
                 value={formData.mapEmbedUrl} 
                 onChange={(e) => setFormData({...formData, mapEmbedUrl: e.target.value})}
-                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white text-xs"
-                placeholder="https://google.com/maps/embed?pb=..."
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-white text-sm"
+                placeholder="https://www.google.com/maps/embed?pb=..."
                 required
               />
             </div>
+          </div>
+        </div>
+
+        {/* Kontak & Sosial Media */}
+        <div className="pt-6 border-t dark:border-gray-800">
+          <h3 className="text-lg font-bold text-gray-700 dark:text-white mb-4 border-l-4 border-[#2D5A27] pl-3">Kontak & Sosial Media</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Alamat Kantor Desa</label>
+              <input 
+                type="text" 
+                value={formData.contactAddress} 
+                onChange={(e) => setFormData({...formData, contactAddress: e.target.value})}
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Email Kontak</label>
+              <input 
+                type="email" 
+                value={formData.contactEmail} 
+                onChange={(e) => setFormData({...formData, contactEmail: e.target.value})}
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Telepon/WhatsApp</label>
+              <input 
+                type="text" 
+                value={formData.contactPhone} 
+                onChange={(e) => setFormData({...formData, contactPhone: e.target.value})}
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Link Facebook</label>
+              <input 
+                type="text" 
+                value={formData.facebook} 
+                onChange={(e) => setFormData({...formData, facebook: e.target.value})}
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-white text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Link Instagram</label>
+              <input 
+                type="text" 
+                value={formData.instagram} 
+                onChange={(e) => setFormData({...formData, instagram: e.target.value})}
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-white text-sm"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Link Youtube Channel</label>
+              <input 
+                type="text" 
+                value={formData.youtube} 
+                onChange={(e) => setFormData({...formData, youtube: e.target.value})}
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-white text-sm"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Statistik Kependudukan */}
+        <div className="pt-6 border-t dark:border-gray-800">
+          <h3 className="text-lg font-bold text-gray-700 dark:text-white mb-4 border-l-4 border-[#2D5A27] pl-3">Statistik Kependudukan (Angka)</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Luas Wilayah</label>
               <input 
                 type="text" 
                 value={formData.statsArea} 
                 onChange={(e) => setFormData({...formData, statsArea: e.target.value})}
-                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white"
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
                 required
               />
             </div>
             <div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Jumlah RT</label>
-                  <input 
-                    type="text" 
-                    value={formData.statsRt} 
-                    onChange={(e) => setFormData({...formData, statsRt: e.target.value})}
-                    className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Jumlah RW</label>
-                  <input 
-                    type="text" 
-                    value={formData.statsRw} 
-                    onChange={(e) => setFormData({...formData, statsRw: e.target.value})}
-                    className="w-full p-2.5 border dark:border-gray-755 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-850 dark:text-white"
-                    required
-                  />
-                </div>
-              </div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Jumlah RT</label>
+              <input 
+                type="text" 
+                value={formData.statsRt} 
+                onChange={(e) => setFormData({...formData, statsRt: e.target.value})}
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
+                required
+              />
             </div>
-
-            {/* Demographics / Demografi */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Jumlah Kepala Keluarga (KK)</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Jumlah RW</label>
+              <input 
+                type="text" 
+                value={formData.statsRw} 
+                onChange={(e) => setFormData({...formData, statsRw: e.target.value})}
+                className="w-full p-2.5 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Jumlah Kepala Keluarga</label>
               <input 
                 type="text" 
                 value={formData.statsKk} 
@@ -413,7 +563,7 @@ const KelolaPengaturan = () => {
                 <button
                   type="button"
                   onClick={handleResetVisitors}
-                  className="bg-red-650 hover:bg-red-750 text-white font-bold px-4 py-2.5 rounded-lg text-xs transition-colors flex items-center justify-center cursor-pointer shadow-sm border border-red-700/10"
+                  className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-lg text-xs transition-colors flex items-center justify-center cursor-pointer shadow-sm border border-red-700/10 animate-pulse"
                 >
                   Reset
                 </button>
@@ -425,7 +575,7 @@ const KelolaPengaturan = () => {
         <div className="pt-6 border-t dark:border-gray-800 flex justify-end">
           <button 
             type="submit"
-            className="bg-[#2D5A27] hover:bg-green-700 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 transition-colors font-medium cursor-pointer"
+            className="bg-[#2D5A27] hover:bg-green-700 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 transition-colors font-semibold cursor-pointer shadow-md"
           >
             <Save size={18} /> Simpan Perubahan
           </button>

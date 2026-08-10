@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Lock, ShieldQuestion } from 'lucide-react';
+import { Save, Lock, ShieldQuestion, User } from 'lucide-react';
 
 const KelolaAkun = () => {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
+  const [currentUsername, setCurrentUsername] = useState('');
+  const [newUsername, setNewUsername] = useState('');
+
   const [securityQuestion, setSecurityQuestion] = useState('');
   const [securityAnswer, setSecurityAnswer] = useState('');
 
@@ -13,21 +16,27 @@ const KelolaAkun = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load existing security question
+  // Load current account settings
   useEffect(() => {
-    const loadQuestion = async () => {
+    const loadAccountSettings = async () => {
       try {
         const API_BASE = import.meta.env.PROD ? '' : 'http://localhost:5000';
-        const res = await fetch(`${API_BASE}/api/auth/security-question`);
-        if (res.ok) {
-          const data = await res.json();
-          setSecurityQuestion(data.question);
+        const userRes = await fetch(`${API_BASE}/api/auth/current-username`);
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          setCurrentUsername(userData.username);
+          setNewUsername(userData.username);
+        }
+        const qRes = await fetch(`${API_BASE}/api/auth/security-question`);
+        if (qRes.ok) {
+          const qData = await qRes.json();
+          setSecurityQuestion(qData.question);
         }
       } catch (err) {
-        console.warn('Could not load security question:', err);
+        console.warn('Could not load account settings:', err);
       }
     };
-    loadQuestion();
+    loadAccountSettings();
   }, []);
 
   const handleUpdateSecurity = async (e: React.FormEvent) => {
@@ -58,6 +67,7 @@ const KelolaAkun = () => {
         body: JSON.stringify({
           oldPassword,
           newPassword: newPassword || undefined,
+          newUsername: newUsername !== currentUsername ? newUsername : undefined,
           securityQuestion: securityQuestion || undefined,
           securityAnswer: securityAnswer || undefined,
         })
@@ -65,13 +75,16 @@ const KelolaAkun = () => {
 
       const data = await res.json();
       if (res.ok) {
-        setSuccessMsg(data.message || 'Keamanan akun berhasil diperbarui!');
+        setSuccessMsg(data.message || 'Kredensial & Keamanan berhasil diperbarui!');
         setOldPassword('');
         setNewPassword('');
         setConfirmPassword('');
         setSecurityAnswer('');
+        if (newUsername !== currentUsername) {
+          setCurrentUsername(newUsername);
+        }
       } else {
-        setErrorMsg(data.message || 'Gagal memperbarui keamanan.');
+        setErrorMsg(data.message || 'Gagal memperbarui kredensial.');
       }
     } catch (err) {
       setErrorMsg('Gagal menyambungkan ke server.');
@@ -88,10 +101,41 @@ const KelolaAkun = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl">
         <form onSubmit={handleUpdateSecurity} className="space-y-6 lg:col-span-2">
-          {/* Form Keamanan */}
+          {/* Form Kredensial & Keamanan */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 space-y-6">
             
-            {/* Password section */}
+            {/* Username Section */}
+            <div>
+              <div className="flex items-center gap-2 mb-4 border-b dark:border-gray-800 pb-2">
+                <User size={18} className="text-[#2D5A27] dark:text-green-400" />
+                <h2 className="text-base font-bold text-gray-900 dark:text-white">Ganti Username Admin</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Username Saat Ini</label>
+                  <input 
+                    type="text" 
+                    value={currentUsername}
+                    className="w-full p-2.5 border dark:border-gray-750 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg outline-none cursor-not-allowed"
+                    readOnly
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-350 mb-1">Username Baru</label>
+                  <input 
+                    type="text" 
+                    value={newUsername}
+                    onChange={(e) => setNewUsername(e.target.value)}
+                    className="w-full p-2.5 border dark:border-gray-755 bg-white dark:bg-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Password Section */}
             <div>
               <div className="flex items-center gap-2 mb-4 border-b dark:border-gray-800 pb-2">
                 <Lock size={18} className="text-[#2D5A27] dark:text-green-400" />
@@ -116,7 +160,7 @@ const KelolaAkun = () => {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className="w-full p-2.5 border dark:border-gray-755 bg-white dark:bg-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none"
-                    placeholder="Kosongkan jika hanya ganti pertanyaan"
+                    placeholder="Kosongkan jika hanya ganti username/pertanyaan"
                   />
                 </div>
                 <div>
@@ -126,17 +170,17 @@ const KelolaAkun = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full p-2.5 border dark:border-gray-755 bg-white dark:bg-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none"
-                    placeholder="Kosongkan jika hanya ganti pertanyaan"
+                    placeholder="Kosongkan jika hanya ganti username/pertanyaan"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Security Question section */}
+            {/* Security Question Section */}
             <div className="pt-4 border-t dark:border-gray-800">
               <div className="flex items-center gap-2 mb-4 border-b dark:border-gray-800 pb-2">
                 <ShieldQuestion size={18} className="text-[#2D5A27] dark:text-green-400" />
-                <h2 className="text-base font-bold text-gray-900 dark:text-white">Pengaturan Lupa Password (Pertanyaan Keamanan)</h2>
+                <h2 className="text-base font-bold text-gray-900 dark:text-white">Pengaturan Lupa Password & Username (Pertanyaan Keamanan)</h2>
               </div>
               
               <div className="space-y-4">
@@ -158,9 +202,9 @@ const KelolaAkun = () => {
                     value={securityAnswer}
                     onChange={(e) => setSecurityAnswer(e.target.value)}
                     className="w-full p-2.5 border dark:border-gray-750 bg-white dark:bg-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none"
-                    placeholder="Masukkan jawaban rahasia untuk pertanyaan di atas..."
+                    placeholder="Masukkan jawaban rahasia baru untuk pertanyaan di atas..."
                   />
-                  <p className="text-[11px] text-gray-500 mt-1">Jawaban ini digunakan untuk mereset password di halaman login bila Anda lupa.</p>
+                  <p className="text-[11px] text-gray-500 mt-1">Jawaban ini digunakan untuk memulihkan username atau mereset password di halaman login.</p>
                 </div>
               </div>
             </div>

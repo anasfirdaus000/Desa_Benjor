@@ -3,6 +3,8 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 export interface SliderImage {
   id: string;
   url: string;
+  title?: string;
+  subtitle?: string;
 }
 
 export interface SOTK {
@@ -72,6 +74,10 @@ export interface VillageInfo {
   heroTitle?: string;
   heroSubtitle?: string;
   footerDescription?: string;
+  logoUrl?: string;
+  faviconUrl?: string;
+  statsBg?: string;
+  wisataBg?: string;
   history: string;
   vision: string;
   mission: string;
@@ -160,6 +166,10 @@ const initialVillageInfo: VillageInfo = {
   heroTitle: 'Selamat Datang di Website Resmi Desa Benjor',
   heroSubtitle: 'Mewujudkan tata kelola pemerintahan desa yang mandiri, transparan, sejahtera, dan berbudaya berlandaskan gotong royong.',
   footerDescription: 'Sistem Informasi Desa Benjor, Kecamatan Tumpang, Kabupaten Malang. Mewujudkan pelayanan desa digital yang efisien, transparan, dan terpercaya.',
+  logoUrl: '',
+  faviconUrl: '',
+  statsBg: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80',
+  wisataBg: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=1920&q=80',
   history: 'Desa Benjor memiliki sejarah panjang yang erat kaitannya dengan perjuangan masyarakat lokal...',
   vision: 'Mewujudkan Desa Benjor yang Mandiri, Sejahtera, dan Berbudaya Berlandaskan Gotong Royong.',
   mission: '1. Meningkatkan kualitas pelayanan publik.\n2. Mengembangkan potensi ekonomi kerakyatan melalui UMKM.\n3. Melestarikan budaya dan lingkungan hidup.',
@@ -435,6 +445,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return nextList;
     });
   };
+
+  // Dynamic favicon updater
+  useEffect(() => {
+    if (villageInfo && villageInfo.faviconUrl) {
+      let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.getElementsByTagName('head')[0].appendChild(link);
+      }
+      link.href = villageInfo.faviconUrl;
+    }
+  }, [villageInfo?.faviconUrl]);
 
   return (
     <AppContext.Provider value={{

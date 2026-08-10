@@ -210,10 +210,10 @@ const Home = () => {
                 Sistem Informasi Digital
               </span>
               <h1 className="text-3xl md:text-6xl font-black text-white mb-5 md:mb-6 drop-shadow-md leading-tight tracking-tight max-w-5xl">
-                {villageInfo.heroTitle || 'Selamat Datang di Website Resmi Desa Benjor'}
+                {sliderImages[currentSlide]?.title || villageInfo.heroTitle || 'Selamat Datang di Website Resmi Desa Benjor'}
               </h1>
               <p className="text-sm md:text-xl text-gray-200/90 max-w-3xl drop-shadow-md mb-8 font-light leading-relaxed">
-                {villageInfo.heroSubtitle || 'Mewujudkan tata kelola pemerintahan desa yang mandiri, transparan, sejahtera, dan berbudaya berlandaskan gotong royong.'}
+                {sliderImages[currentSlide]?.subtitle || villageInfo.heroSubtitle || 'Mewujudkan tata kelola pemerintahan desa yang mandiri, transparan, sejahtera, dan berbudaya berlandaskan gotong royong.'}
               </p>
               <div className="flex gap-3 md:gap-4 flex-wrap">
                 <Link to="/profil" className="bg-[#2D5A27] hover:bg-green-700 text-white font-semibold px-5 py-2.5 md:px-6 md:py-3 rounded-lg text-sm md:text-base shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
@@ -286,11 +286,11 @@ const Home = () => {
 
       {/* Administrasi Penduduk with 3D/Parallax background */}
       <section 
-        className="relative py-24 px-4 overflow-hidden bg-cover bg-center bg-fixed bg-no-repeat border-y border-gray-100 dark:border-gray-850"
-        style={{ backgroundImage: `url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80')` }}
+        className="relative py-24 px-4 overflow-hidden bg-cover bg-center bg-scroll md:bg-fixed bg-no-repeat border-y border-gray-100 dark:border-gray-850"
+        style={{ backgroundImage: `url('${villageInfo.statsBg || 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80'}')` }}
       >
         {/* Soft background overlay for text readability */}
-        <div className="absolute inset-0 bg-white/45 dark:bg-gray-950/55 z-0" />
+        <div className="absolute inset-0 bg-white/85 dark:bg-gray-950/85 md:bg-white/45 md:dark:bg-gray-950/55 z-0" />
         
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -591,11 +591,11 @@ const Home = () => {
 
       {/* Wisata Desa Benjor section (previously Galeri) with Parallax background */}
       <section 
-        className="relative py-24 px-4 overflow-hidden bg-cover bg-center bg-fixed bg-no-repeat border-t border-gray-100 dark:border-gray-850"
-        style={{ backgroundImage: `url('https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=1920&q=80')` }}
+        className="relative py-24 px-4 overflow-hidden bg-cover bg-center bg-scroll md:bg-fixed bg-no-repeat border-t border-gray-100 dark:border-gray-850"
+        style={{ backgroundImage: `url('${villageInfo.wisataBg || 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=1920&q=80'}')` }}
       >
         {/* Soft background overlay */}
-        <div className="absolute inset-0 bg-white/45 dark:bg-gray-950/55 z-0" />
+        <div className="absolute inset-0 bg-white/85 dark:bg-gray-950/85 md:bg-white/45 md:dark:bg-gray-950/55 z-0" />
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-16">
@@ -691,7 +691,7 @@ const Home = () => {
                   <img 
                     src={activeWisataPhotos[activePhotoIdx]} 
                     alt={activeWisata.title} 
-                    className="w-full h-full object-cover transition-all duration-300"
+                    className="w-full h-full object-contain bg-gray-100 dark:bg-gray-900 transition-all duration-300"
                   />
                   {/* Photo slides arrow navigation overlays */}
                   {activeWisataPhotos.length > 1 && (

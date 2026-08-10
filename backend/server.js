@@ -210,8 +210,8 @@ app.post('/api/auth/login', async (req, res) => {
   try {
     const db = await fetchDb();
     const dbPassword = db.adminPassword || process.env.ADMIN_PASSWORD || 'admin';
-    const envUser = process.env.ADMIN_USERNAME || 'admin';
-    if (username === envUser && password === dbPassword) {
+    const dbUsername = db.adminUsername || process.env.ADMIN_USERNAME || 'admin';
+    if (username === dbUsername && password === dbPassword) {
       const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
       return res.json({ token, username });
     }
@@ -221,9 +221,18 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+app.get('/api/auth/current-username', async (req, res) => {
+  try {
+    const db = await fetchDb();
+    res.json({ username: db.adminUsername || process.env.ADMIN_USERNAME || 'admin' });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
 app.post('/api/auth/change-password', async (req, res) => {
   if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
-  const { oldPassword, newPassword, securityQuestion, securityAnswer } = req.body;
+  const { oldPassword, newPassword, newUsername, securityQuestion, securityAnswer } = req.body;
   try {
     const db = await fetchDb();
     const dbPassword = db.adminPassword || process.env.ADMIN_PASSWORD || 'admin';
@@ -231,6 +240,7 @@ app.post('/api/auth/change-password', async (req, res) => {
       return res.status(400).json({ message: 'Password lama tidak cocok!' });
     }
     if (newPassword) db.adminPassword = newPassword;
+    if (newUsername) db.adminUsername = newUsername;
     if (securityQuestion) db.securityQuestion = securityQuestion;
     if (securityAnswer) db.securityAnswer = securityAnswer;
     await saveDb(db);
@@ -260,6 +270,21 @@ app.post('/api/auth/reset-password', async (req, res) => {
     db.adminPassword = newPassword;
     await saveDb(db);
     res.json({ message: 'Password berhasil diriset!' });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+app.post('/api/auth/recover-username', async (req, res) => {
+  const { answer } = req.body;
+  try {
+    const db = await fetchDb();
+    const dbAnswer = (db.securityAnswer || 'benjor').trim().toLowerCase();
+    if (!answer || answer.trim().toLowerCase() !== dbAnswer) {
+      return res.status(400).json({ message: 'Jawaban keamanan salah!' });
+    }
+    const dbUsername = db.adminUsername || process.env.ADMIN_USERNAME || 'admin';
+    res.json({ username: dbUsername });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
