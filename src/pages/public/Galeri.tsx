@@ -141,7 +141,10 @@ const Galeri = () => {
                 <img 
                   src={spot.image} 
                   alt={spot.title} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                  className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ${
+                    spot.align === 'top' ? 'object-top' :
+                    spot.align === 'bottom' ? 'object-bottom' : 'object-center'
+                  }`} 
                 />
               </div>
               <div className="p-6 flex-grow flex flex-col justify-between">
@@ -231,7 +234,12 @@ const Galeri = () => {
                   <img 
                     src={activeWisataPhotos[activePhotoIdx]} 
                     alt={activeWisata.title} 
-                    className="w-full h-full object-cover transition-all duration-300"
+                    className={`w-full h-full object-cover transition-all duration-300 ${
+                      activePhotoIdx === 0 && activeWisata.align
+                        ? activeWisata.align === 'top' ? 'object-top' :
+                          activeWisata.align === 'bottom' ? 'object-bottom' : 'object-center'
+                        : 'object-center'
+                    }`}
                   />
                   {/* Photo slides arrow navigation overlays */}
                   {activeWisataPhotos.length > 1 && (

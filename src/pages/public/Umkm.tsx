@@ -78,7 +78,10 @@ const Umkm = () => {
                   <img 
                     src={product.image} 
                     alt={product.name} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${
+                      product.align === 'top' ? 'object-top' :
+                      product.align === 'bottom' ? 'object-bottom' : 'object-center'
+                    }`}
                   />
                   <div className="absolute top-2 right-2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold text-[#2D5A27] dark:text-green-450 shadow-sm border dark:border-gray-800">
                     {product.category}

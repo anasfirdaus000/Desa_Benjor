@@ -379,6 +379,15 @@ app.delete('/api/slider/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
+app.put('/api/slider/:id', async (req, res) => {
+  if (!validateAdmin(req)) return res.status(401).json({ message: 'Unauthorized' });
+  try {
+    const db = await fetchDb();
+    db.sliderImages = (db.sliderImages || []).map(s => s.id === req.params.id ? { ...s, ...req.body } : s);
+    await trySave(res, db, { message: 'Slide updated' });
+  } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
 // --- BERITA ---
 app.get('/api/berita', async (req, res) => {
   try { const db = await fetchDb(); res.json(db.berita || []); }

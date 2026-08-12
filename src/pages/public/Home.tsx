@@ -267,7 +267,10 @@ const Home = () => {
             <img 
               src={villageInfo.headImage} 
               alt={villageInfo.headName} 
-              className="w-full h-full object-contain bg-gray-50 dark:bg-gray-800 p-1.5"
+              className={`w-full h-full object-cover ${
+                villageInfo.headAlign === 'top' ? 'object-top' :
+                villageInfo.headAlign === 'bottom' ? 'object-bottom' : 'object-center'
+              }`}
             />
           </motion.div>
           <div className="flex-1 text-center md:text-left">

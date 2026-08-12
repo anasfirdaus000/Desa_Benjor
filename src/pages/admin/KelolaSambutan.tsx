@@ -11,6 +11,7 @@ const KelolaSambutan = () => {
     headName: villageInfo.headName || '',
     headImage: villageInfo.headImage || '',
     welcomeMessage: villageInfo.welcomeMessage || '',
+    headAlign: villageInfo.headAlign || 'center',
   });
 
   // Keep state in sync with context when loaded asynchronously
@@ -20,6 +21,7 @@ const KelolaSambutan = () => {
         headName: villageInfo.headName || '',
         headImage: villageInfo.headImage || '',
         welcomeMessage: villageInfo.welcomeMessage || '',
+        headAlign: villageInfo.headAlign || 'center',
       });
       if (villageInfo.headImage) {
         setPreviewUrl(villageInfo.headImage);
@@ -46,6 +48,7 @@ const KelolaSambutan = () => {
       headName: formData.headName,
       headImage: formData.headImage,
       welcomeMessage: formData.welcomeMessage,
+      headAlign: formData.headAlign,
     });
     alert('Sambutan Kepala Desa berhasil diperbarui!');
   };
@@ -64,12 +67,15 @@ const KelolaSambutan = () => {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Foto Preview & Upload */}
           <div className="w-full md:w-1/3 flex flex-col items-center">
-            <div className="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-gray-100 dark:border-gray-800 mb-4 bg-gray-50 dark:bg-gray-800 flex items-center justify-center relative">
+            <div className="w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-gray-100 dark:border-gray-800 mb-4 bg-gray-55 dark:bg-gray-800 flex items-center justify-center relative">
               {formData.headImage ? (
                 <img 
                   src={formData.headImage} 
                   alt={formData.headName} 
-                  className="w-full h-full object-cover"
+                  className={`w-full h-full object-cover ${
+                    formData.headAlign === 'top' ? 'object-top' :
+                    formData.headAlign === 'bottom' ? 'object-bottom' : 'object-center'
+                  }`}
                 />
               ) : (
                 <ImageIcon size={48} className="text-gray-300 dark:text-gray-650" />
@@ -83,7 +89,7 @@ const KelolaSambutan = () => {
             
             <div className="w-full space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-center">Upload Foto Perangkat (Cloudinary)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-303 mb-2 text-center">Upload Foto Perangkat (Cloudinary)</label>
                 <input 
                   type="file" 
                   accept="image/*" 
@@ -93,12 +99,12 @@ const KelolaSambutan = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-center">Atau Masukkan URL Foto</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-303 mb-1 text-center">Atau Masukkan URL Foto</label>
                 <input 
                   type="text" 
                   value={formData.headImage} 
                   onChange={(e) => setFormData({...formData, headImage: e.target.value})}
-                  className="w-full p-2 text-sm border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-850 dark:text-white text-center" 
+                  className="w-full p-2 text-sm border dark:border-gray-755 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-850 dark:text-white text-center" 
                   placeholder="https://example.com/foto.jpg"
                   required
                 />
@@ -109,7 +115,7 @@ const KelolaSambutan = () => {
           {/* Text Inputs */}
           <div className="w-full md:w-2/3 space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama & Gelar Kepala Desa</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-303 mb-1">Nama & Gelar Kepala Desa</label>
               <input 
                 type="text" 
                 value={formData.headName} 
@@ -121,11 +127,24 @@ const KelolaSambutan = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Teks Kutipan Sambutan</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-303 mb-1 font-semibold">Focal Point Foto (Fokus Foto Kades)</label>
+              <select 
+                value={formData.headAlign} 
+                onChange={(e) => setFormData({...formData, headAlign: e.target.value})}
+                className="w-full p-2 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-850 dark:text-white"
+              >
+                <option value="top">Atas (Top) - Bagus untuk pas foto kepala</option>
+                <option value="center">Tengah (Center)</option>
+                <option value="bottom">Bawah (Bottom)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-303 mb-1">Teks Kutipan Sambutan</label>
               <textarea 
                 value={formData.welcomeMessage} 
                 onChange={(e) => setFormData({...formData, welcomeMessage: e.target.value})}
-                className="w-full p-2 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-850 dark:text-white h-32" 
+                className="w-full p-2 border dark:border-gray-750 rounded-lg focus:ring-2 focus:ring-[#2D5A27] outline-none bg-white dark:bg-gray-855 dark:text-white h-32" 
                 placeholder="Tuliskan kutipan sambutan Kepala Desa..."
                 required
               ></textarea>

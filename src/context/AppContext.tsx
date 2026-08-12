@@ -440,6 +440,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         for (const item of added) {
           await syncWithBackend(getApiUrl('/api/slider'), 'POST', item);
         }
+        // Updates
+        const updated = nextList.filter(n => {
+          const old = prev.find(p => p.id === n.id);
+          return old && JSON.stringify(old) !== JSON.stringify(n);
+        });
+        for (const item of updated) {
+          await syncWithBackend(getApiUrl(`/api/slider/${item.id}`), 'PUT', item);
+        }
       })();
       return nextList;
     });
